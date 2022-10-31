@@ -118,3 +118,4 @@ sw.*
 .nitro
 .output
 .vscode
+pgdata

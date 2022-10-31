@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lembaga {
+  id              String  @id @db.Uuid
+  kecamatan       String
+  desa            String
+  nama            String
+  is_madrasah     String
+  tingkat       String
+  // TK, PAUD, SD, SMP, SMA, SMK
+  profil          String?
+  jenis           String
+  // Negeri Swasta
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  daftar_siswa    Siswa[]
+  daftar_guru     Guru[]
+  daftar_tenaga_sekolah TenagaKependidikan[]
+  daftar_sarana_prasarana SaranaPrasarana[]
+}
+
+model Siswa {
+  id              String    @id @db.Uuid
+  nama            String    @default("")
+  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
+  lembaga_id      String    @db.Uuid
+  nomor_induk     String?
+  kelas           Int?
+  tanggal_lahir   DateTime?
+  alamat          String?
+  no_ponsel       String?
+  // tingkat
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  tahun_ajaran    String
+  jenis_kelamin   String
+  is_delete       Boolean   @default(false)
+}
+
+model Guru {
+  id              String    @id @db.Uuid
+  nama            String    @default("")
+  no_ktp          String
+  alamat          String?
+  no_ponsel       String?
+  ptk             String?   // mata kelas
+  jenis_kelamin   String
+  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
+  lembaga_id      String    @db.Uuid
+  is_active       Boolean   @default(true)
+  is_delete       Boolean   @default(false)
+}
+
+model TenagaKependidikan {
+  id              String    @id @db.Uuid
+  nama            String
+  jabatan         String
+  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
+  lembaga_id      String    @db.Uuid
+}
+
+model SaranaPrasarana {
+  id                String    @id @db.Uuid
+  nama              String
+  jumlah            Int?
+  jenis             String
+  tingkat_kelayakan Int // 1-10
+  lembaga           Lembaga   @relation(fields: [lembaga_id], references: [id])
+  lembaga_id        String    @db.Uuid
+}
+
+model User {
+  id              String      @id @db.Uuid
+  // email           String      @unique
+  username        String      @unique
+  name            String?
+  password        String
+  level           String      // root | operator
+  scope           String      // pendidikan | kemenag | cabang dinas
+}
+
