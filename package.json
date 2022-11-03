@@ -4,9 +4,8 @@
   "author": "rahmanhasri",
   "license": "MPL-2.0",
   "scripts": {
-    "dev": "PORT=3000 nodemon index.mjs",
+    "dev": "nuxt",
     "build": "nuxt build",
-    "product": "NODE_ENV=production node index.mjs",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
     "lint:prettier": "prettier --check .",
@@ -22,9 +21,14 @@
     "@prisma/client": "^4.5.0",
     "bcrypt": "^5.1.0",
     "core-js": "^3.25.3",
+    "dotenv": "^16.0.3",
     "esm": "^3.2.25",
     "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1",
+    "morgan-body": "^2.6.8",
     "nuxt": "^2.15.8",
+    "nuxt-buefy": "^0.4.24",
+    "nuxt-leaflet": "^0.0.27",
     "uuid": "^9.0.0",
     "vue": "^2.7.10",
     "vue-server-renderer": "^2.7.10",
@@ -38,9 +42,9 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-nuxt": "^4.0.0",
     "eslint-plugin-vue": "^9.5.1",
-    "nodemon": "^2.0.20",
     "prettier": "^2.7.1",
-    "prisma": "^4.5.0"
+    "prisma": "^4.5.0",
+    "studio": "^0.13.5"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

@@ -35,6 +35,24 @@ async function main() {
       scope: 'dinasprov',
     }],
   })
+  if (process.env.NODE_ENV !== 'production') {
+    await prisma.lembaga.createMany({
+      data: [{
+        id: "018daeac-7803-492a-91ab-e16592c3a238",
+        kecamatan: "test",
+        kelurahan: "lurah",
+        desa: "desa",
+        nama: "lembaga",
+        is_madrasah: false,
+        tingkat: "SMP",
+        profil: "sekolah description",
+        jenis: "swasta",
+        koordinat: ["1", "1"],
+        created_at: "2022-11-01T18:28:02.178Z",
+        updated_at: "2022-11-01T18:28:30.579Z"
+      }]
+    })
+  }
 }
 
 main()

@@ -12,61 +12,60 @@ datasource db {
 
 model Lembaga {
   id              String  @id @db.Uuid
-  kecamatan       String
-  desa            String
-  nama            String
-  is_madrasah     String
-  tingkat       String
+  kecamatan       String  @db.VarChar(255)
+  kelurahan       String? @db.VarChar(255)
+  desa            String? @db.VarChar(255)
+  nama            String  @db.VarChar(255)
+  is_madrasah     Boolean?
+  tingkat         String  @db.Char(8)
   // TK, PAUD, SD, SMP, SMA, SMK
-  profil          String?
-  jenis           String
+  profil          String? @db.Text
+  jenis           String  @db.Char(8)
+
+  koordinat       String[]
   // Negeri Swasta
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   daftar_siswa    Siswa[]
-  daftar_guru     Guru[]
-  daftar_tenaga_sekolah TenagaKependidikan[]
+  daftar_guru     TenagaPendidikanGuru[]
   daftar_sarana_prasarana SaranaPrasarana[]
 }
 
 model Siswa {
   id              String    @id @db.Uuid
-  nama            String    @default("")
+  nama            String    @default("") @db.VarChar(255)
   lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
   lembaga_id      String    @db.Uuid
-  nomor_induk     String?
+  nomor_induk     String?   @db.Char(32)
   kelas           Int?
   tanggal_lahir   DateTime?
-  alamat          String?
-  no_ponsel       String?
+  alamat          String?   @db.Text
+  no_ponsel       String?   @db.Char(24)
+  tingkat         String    @db.Char(8)
   // tingkat
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
-  tahun_ajaran    String
-  jenis_kelamin   String
+  tahun_ajaran    String    @db.Char(16)
+  jenis_kelamin   String    @db.Char(8)
   is_delete       Boolean   @default(false)
 }
 
-model Guru {
+model TenagaPendidikanGuru {
   id              String    @id @db.Uuid
-  nama            String    @default("")
-  no_ktp          String
-  alamat          String?
-  no_ponsel       String?
-  ptk             String?   // mata kelas
-  jenis_kelamin   String
+  nama            String    @default("") @db.VarChar(255)
+  no_ktp          String    @db.Char(255)
+  alamat          String?   @db.Text
+  no_ponsel       String?   @db.Char(24)
+  ptk             String?   @db.VarChar(255) // mata kelas
+  jenis_kelamin   String    @db.Char(8)
+  tanggal_lahir   DateTime?
   lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
   lembaga_id      String    @db.Uuid
+  latar_belakang  String    @db.Text @default("")
+  jabatan         String?   @db.VarChar(255)
+  status          String?   @db.Char(8) // pns / honorer / swasta
   is_active       Boolean   @default(true)
   is_delete       Boolean   @default(false)
-}
-
-model TenagaKependidikan {
-  id              String    @id @db.Uuid
-  nama            String
-  jabatan         String
-  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
-  lembaga_id      String    @db.Uuid
 }
 
 model SaranaPrasarana {
@@ -74,9 +73,10 @@ model SaranaPrasarana {
   nama              String
   jumlah            Int?
   jenis             String
-  tingkat_kelayakan Int // 1-10
+  tingkat_kerusakan Int // 1-10
   lembaga           Lembaga   @relation(fields: [lembaga_id], references: [id])
   lembaga_id        String    @db.Uuid
+  is_bangunan       Boolean   @default(false)
 }
 
 model User {

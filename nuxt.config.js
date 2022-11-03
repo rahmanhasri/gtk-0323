@@ -11,7 +11,10 @@ export default {
       { hid: 'description', name: 'description', content: '' },
       { name: 'format-detection', content: 'telephone=no' },
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    link: [
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'stylesheet', href: 'https://unpkg.com/leaflet@1.2.0/dist/leaflet.css' },
+    ],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
@@ -29,10 +32,13 @@ export default {
     '@nuxtjs/eslint-module',
   ],
 
+  ssr: true,
+  target: 'server',
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    'nuxt-leaflet',
     '@nuxtjs/axios',
-    '@nuxtjs/bulma',
+    'nuxt-buefy',
     '@nuxtjs/auth',
     '@nuxtjs/toast',
   ],
@@ -43,21 +49,25 @@ export default {
     baseURL: '/',
   },
 
-  auth: {
-    strategies: {
-      local: {
-        endpoints: {
-          login: { url: 'authentication', method: 'post', propertyName: 'accessToken' },
-          logout: false,
-          user: false,
-        },
-      }
-    },
-    redirect: {
-      logout: '/login',
-    },
-  },
+  serverMiddleware: [
+    { path: '/api', handler: '~/server-middleware/rest.mjs' },
+  ],
+
+  // auth: {
+  //   strategies: {
+  //     local: {
+  //       endpoints: {
+  //         login: { url: 'authentication', method: 'post', propertyName: 'accessToken' },
+  //         logout: false,
+  //         user: false,
+  //       },
+  //     }
+  //   },
+  //   redirect: {
+  //     logout: '/login',
+  //   },
+  // },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {}
 }
