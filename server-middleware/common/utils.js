@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import jwt from 'jsonwebtoken'
-import * as constant from './constant.mjs'
+import * as constant from './constant.js'
 
 export const errorWrapper = (fn) => async (req, res, next) => {
   try {

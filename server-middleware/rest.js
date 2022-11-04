@@ -1,15 +1,14 @@
 /* eslint-disable no-console */
-// import { Nuxt, Builder } from 'nuxt'
 import express from 'express'
 import morganBody from 'morgan-body'
 import * as dotenv from 'dotenv'
-import * as constant from './constant.mjs'
-import * as utils from './utils.mjs'
+import * as constant from './common/constant.js'
+import * as utils from './common/utils.js'
 
 
 // routes
-import userRoutes from './user.controller.mjs'
-import lembagaRoutes from './lembaga.controller.mjs'
+import userRoutes from './controller/user.controller.js'
+import lembagaRoutes from './controller/lembaga.controller.js'
 
 dotenv.config()
 const app = express()

@@ -1,7 +1,7 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
 import * as uuid from 'uuid'
-import * as utils from './utils.mjs'
+import * as utils from '../common/utils.js'
 
 const router = express.Router()
 

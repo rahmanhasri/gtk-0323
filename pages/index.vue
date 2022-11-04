@@ -12,8 +12,7 @@
 <script>
 export default {
   name: 'IndexPage',
-  components: {
-  },
+  middleware: ['auth'],
   methods: {
     zoomUpdated (zoom) {
       this.zoom = zoom;
