@@ -1,9 +1,9 @@
 -- CreateTable
-CREATE TABLE "Lembaga" (
+CREATE TABLE "Sekolah" (
     "id" UUID NOT NULL,
     "kecamatan" VARCHAR(255) NOT NULL,
     "kelurahan" VARCHAR(255),
-    "desa" VARCHAR(255),
+    "kelurahan_atau_desa" VARCHAR(255),
     "nama" VARCHAR(255) NOT NULL,
     "is_madrasah" BOOLEAN,
     "tingkat" CHAR(8) NOT NULL,
@@ -13,14 +13,14 @@ CREATE TABLE "Lembaga" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Lembaga_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Sekolah_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Siswa" (
     "id" UUID NOT NULL,
     "nama" VARCHAR(255) NOT NULL DEFAULT '',
-    "lembaga_id" UUID NOT NULL,
+    "sekolah_id" UUID NOT NULL,
     "nomor_induk" CHAR(32),
     "kelas" INTEGER,
     "tanggal_lahir" TIMESTAMP(3),
@@ -46,7 +46,7 @@ CREATE TABLE "TenagaPendidikanGuru" (
     "ptk" VARCHAR(255),
     "jenis_kelamin" CHAR(8) NOT NULL,
     "tanggal_lahir" TIMESTAMP(3),
-    "lembaga_id" UUID NOT NULL,
+    "sekolah_id" UUID NOT NULL,
     "latar_belakang" TEXT NOT NULL DEFAULT '',
     "jabatan" VARCHAR(255),
     "status" CHAR(8),
@@ -63,7 +63,7 @@ CREATE TABLE "SaranaPrasarana" (
     "jumlah" INTEGER,
     "jenis" TEXT NOT NULL,
     "tingkat_kerusakan" INTEGER NOT NULL,
-    "lembaga_id" UUID NOT NULL,
+    "sekolah_id" UUID NOT NULL,
     "is_bangunan" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "SaranaPrasarana_pkey" PRIMARY KEY ("id")
@@ -85,10 +85,10 @@ CREATE TABLE "User" (
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- AddForeignKey
-ALTER TABLE "Siswa" ADD CONSTRAINT "Siswa_lembaga_id_fkey" FOREIGN KEY ("lembaga_id") REFERENCES "Lembaga"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Siswa" ADD CONSTRAINT "Siswa_sekolah_id_fkey" FOREIGN KEY ("sekolah_id") REFERENCES "Sekolah"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TenagaPendidikanGuru" ADD CONSTRAINT "TenagaPendidikanGuru_lembaga_id_fkey" FOREIGN KEY ("lembaga_id") REFERENCES "Lembaga"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "TenagaPendidikanGuru" ADD CONSTRAINT "TenagaPendidikanGuru_sekolah_id_fkey" FOREIGN KEY ("sekolah_id") REFERENCES "Sekolah"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SaranaPrasarana" ADD CONSTRAINT "SaranaPrasarana_lembaga_id_fkey" FOREIGN KEY ("lembaga_id") REFERENCES "Lembaga"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SaranaPrasarana" ADD CONSTRAINT "SaranaPrasarana_sekolah_id_fkey" FOREIGN KEY ("sekolah_id") REFERENCES "Sekolah"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

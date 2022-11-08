@@ -15,7 +15,7 @@ export const errorWrapper = (fn) => async (req, res, next) => {
 
 export const pick = (object, keys) => {
   return keys.reduce((result, key) => {
-     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
+     if (object && Object.prototype.hasOwnProperty.call(object, key) && object[key]) {
         result[key] = object[key];
      }
      return result;
@@ -52,4 +52,14 @@ export const authMiddleware = (req, res, next) => {
   }
   req.user = decodedJwt
   next()
+}
+
+export const prismaPagination = (page, limit) => {
+  if (!page) {
+    return {}
+  }
+  return {
+    skip: (page - 1) * limit,
+    take: +limit,
+  }
 }

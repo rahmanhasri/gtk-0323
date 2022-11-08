@@ -10,32 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Lembaga {
-  id              String  @id @db.Uuid
-  kecamatan       String  @db.VarChar(255)
-  kelurahan       String? @db.VarChar(255)
-  desa            String? @db.VarChar(255)
-  nama            String  @db.VarChar(255)
-  is_madrasah     Boolean?
-  tingkat         String  @db.Char(8)
+model Sekolah {
+  id                      String  @id @db.Uuid
+  kecamatan               String  @db.VarChar(255)
+  kelurahan_atau_desa     String? @db.VarChar(255)
+  nama                    String  @db.VarChar(255)
+  is_madrasah             Boolean?
+  tingkat                 String  @db.Char(8)
   // TK, PAUD, SD, SMP, SMA, SMK
-  profil          String? @db.Text
-  jenis           String  @db.Char(8)
+  profil                  String? @db.Text
+  jenis                   String  @db.Char(8)
 
-  koordinat       String[]
+  koordinat               String[]
   // Negeri Swasta
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  daftar_siswa    Siswa[]
-  daftar_guru     TenagaPendidikanGuru[]
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  daftar_siswa            Siswa[]
+  daftar_guru             TenagaPendidikanGuru[]
   daftar_sarana_prasarana SaranaPrasarana[]
 }
 
 model Siswa {
   id              String    @id @db.Uuid
   nama            String    @default("") @db.VarChar(255)
-  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
-  lembaga_id      String    @db.Uuid
+  sekolah         Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id      String    @db.Uuid
   nomor_induk     String?   @db.Char(32)
   kelas           Int?
   tanggal_lahir   DateTime?
@@ -59,8 +58,8 @@ model TenagaPendidikanGuru {
   ptk             String?   @db.VarChar(255) // mata kelas
   jenis_kelamin   String    @db.Char(8)
   tanggal_lahir   DateTime?
-  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
-  lembaga_id      String    @db.Uuid
+  sekolah         Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id      String    @db.Uuid
   latar_belakang  String    @db.Text @default("")
   jabatan         String?   @db.VarChar(255)
   status          String?   @db.Char(8) // pns / honorer / swasta
@@ -74,8 +73,8 @@ model SaranaPrasarana {
   jumlah            Int?
   jenis             String
   tingkat_kerusakan Int // 1-10
-  lembaga           Lembaga   @relation(fields: [lembaga_id], references: [id])
-  lembaga_id        String    @db.Uuid
+  sekolah           Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id        String    @db.Uuid
   is_bangunan       Boolean   @default(false)
 }
 

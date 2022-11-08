@@ -21,7 +21,9 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [],
+  css: [
+    '@/assets/scss/main.scss',
+  ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [],
@@ -39,6 +41,7 @@ export default {
   modules: [
     'nuxt-leaflet',
     '@nuxtjs/axios',
+    // '@nuxtjs/bulma',
     'nuxt-buefy',
     '@nuxtjs/auth',
     '@nuxtjs/toast',
@@ -67,6 +70,7 @@ export default {
   },
   redirect: {
     logout: '/login',
+    login: '/',
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

@@ -1,5 +1,4 @@
 <template>
-
   <body>
     <section>
       <div class="columns is-multiline" style="z-index:1000">
@@ -13,12 +12,12 @@
               <h1 class="title is-4">Login</h1>
               <div v-if="error" class="notification is-danger">
                 <button class="delete" @click="error = null"></button>
-              Email / Password salah
+              Username / Password salah
               </div>
               <form @submit.prevent="login">
                 <div class="field">
                   <div class="control">
-                    <input v-model="email" class="input " placeholder="Username">
+                    <input v-model="username" class="input " placeholder="Username">
                   </div>
                 </div>
                 <div class="field" style="">
@@ -42,7 +41,7 @@
     middleware: 'guest',
     data() {
       return {
-        email: '',
+        username: '',
         password: '',
         error: null
       }
@@ -58,12 +57,12 @@
           this.$store.commit('loading');
           const response = await this.$auth.loginWith('local', {
             data: {
-              email: this.email,
+              username: this.username,
               password: this.password,
             },
           });
           this.$store.commit('finishLoading');
-          this.$auth.$storage.setUniversal('rolusr', response.data.user.level);
+          this.$auth.$storage.setUniversal('scopeusr', response.data.user.scope);
         } catch (e) {
           this.error = e.message
           this.$store.commit('finishLoading');
