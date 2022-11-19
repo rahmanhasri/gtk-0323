@@ -36,12 +36,11 @@ async function main() {
     }],
   })
   if (process.env.NODE_ENV !== 'production') {
-    await prisma.lembaga.createMany({
+    await prisma.sekolah.createMany({
       data: [{
         id: "018daeac-7803-492a-91ab-e16592c3a238",
         kecamatan: "test",
-        kelurahan: "lurah",
-        desa: "desa",
+        kelurahan_atau_desa: "lurah atau desa",
         nama: "lembaga",
         is_madrasah: false,
         tingkat: "SMP",
@@ -49,7 +48,8 @@ async function main() {
         jenis: "swasta",
         koordinat: ["1", "1"],
         created_at: "2022-11-01T18:28:02.178Z",
-        updated_at: "2022-11-01T18:28:30.579Z"
+        updated_at: "2022-11-01T18:28:30.579Z",
+        npsn: '1234',
       }]
     })
   }

@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
+import path from 'path'
 import jwt from 'jsonwebtoken'
-import * as constant from './constant.mjs'
+import * as constant from './constant.js'
 
 export const errorWrapper = (fn) => async (req, res, next) => {
   try {
@@ -15,7 +16,7 @@ export const errorWrapper = (fn) => async (req, res, next) => {
 
 export const pick = (object, keys) => {
   return keys.reduce((result, key) => {
-     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
+     if (object && Object.prototype.hasOwnProperty.call(object, key) && object[key]) {
         result[key] = object[key];
      }
      return result;
@@ -52,4 +53,31 @@ export const authMiddleware = (req, res, next) => {
   }
   req.user = decodedJwt
   next()
+}
+
+export const prismaPagination = (page, limit) => {
+  if (!page) {
+    return {}
+  }
+  return {
+    skip: (page - 1) * limit,
+    take: +limit,
+  }
+}
+
+export const pathResolve = (filePath) => {
+  return path.resolve('server-middleware' + filePath)
+}
+
+export const addQuerySekolahByUserAccess = (reqQuery, user) => {
+  if (user?.level === 'operator') {
+    if (user.scope === 'dinasprov') {
+      return Object.assign(reqQuery, { tingkat: 'SMA' })
+    } else if (user.scope === 'kemenag') {
+      return Object.assign(reqQuery, { is_madrasah: true })
+    } else if (user.scope === 'pendidikan') {
+      return Object.assign(reqQuery, { is_madrasah: false})
+    }
+  }
+  return reqQuery
 }

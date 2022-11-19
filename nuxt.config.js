@@ -1,5 +1,8 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
+  server: {
+    port: 3000,
+  },
   head: {
     title: 'gtk-0323',
     htmlAttrs: {
@@ -18,7 +21,9 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [],
+  css: [
+    '@/assets/scss/main.scss',
+  ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [],
@@ -32,12 +37,11 @@ export default {
     '@nuxtjs/eslint-module',
   ],
 
-  ssr: true,
-  target: 'server',
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     'nuxt-leaflet',
     '@nuxtjs/axios',
+    // '@nuxtjs/bulma',
     'nuxt-buefy',
     '@nuxtjs/auth',
     '@nuxtjs/toast',
@@ -50,23 +54,24 @@ export default {
   },
 
   serverMiddleware: [
-    { path: '/api', handler: '~/server-middleware/rest.mjs' },
+    { path: '/api', handler: '~/server-middleware/rest.js' },
   ],
 
-  // auth: {
-  //   strategies: {
-  //     local: {
-  //       endpoints: {
-  //         login: { url: 'authentication', method: 'post', propertyName: 'accessToken' },
-  //         logout: false,
-  //         user: false,
-  //       },
-  //     }
-  //   },
-  //   redirect: {
-  //     logout: '/login',
-  //   },
-  // },
+  auth: {
+    strategies: {
+      local: {
+        endpoints: {
+          login: { url: '/api/users/authentication', method: 'post', propertyName: 'token' },
+          logout: false,
+          user: false,
+        },
+      }
+    },
+  },
+  redirect: {
+    logout: '/login',
+    login: '/',
+  },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {}

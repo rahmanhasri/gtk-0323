@@ -10,72 +10,72 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Lembaga {
-  id              String  @id @db.Uuid
-  kecamatan       String  @db.VarChar(255)
-  kelurahan       String? @db.VarChar(255)
-  desa            String? @db.VarChar(255)
-  nama            String  @db.VarChar(255)
-  is_madrasah     Boolean?
-  tingkat         String  @db.Char(8)
+model Sekolah {
+  id                      String  @id @db.Uuid @default(uuid())
+  kecamatan               String  @db.VarChar(255)
+  kelurahan_atau_desa     String? @db.VarChar(255)
+  nama                    String  @db.VarChar(255)
+  is_madrasah             Boolean?
+  tingkat                 String  @db.VarChar(8)
   // TK, PAUD, SD, SMP, SMA, SMK
-  profil          String? @db.Text
-  jenis           String  @db.Char(8)
-
-  koordinat       String[]
+  profil                  String? @db.Text
+  jenis                   String  @db.VarChar(8)
   // Negeri Swasta
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  daftar_siswa    Siswa[]
-  daftar_guru     TenagaPendidikanGuru[]
+  npsn                    String @unique @db.VarChar(16)
+  koordinat               String[]
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  daftar_siswa            Siswa[]
+  daftar_guru             TenagaPendidikanGuru[]
   daftar_sarana_prasarana SaranaPrasarana[]
 }
 
 model Siswa {
-  id              String    @id @db.Uuid
-  nama            String    @default("") @db.VarChar(255)
-  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
-  lembaga_id      String    @db.Uuid
-  nomor_induk     String?   @db.Char(32)
-  kelas           Int?
-  tanggal_lahir   DateTime?
-  alamat          String?   @db.Text
-  no_ponsel       String?   @db.Char(24)
-  tingkat         String    @db.Char(8)
-  // tingkat
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  tahun_ajaran    String    @db.Char(16)
-  jenis_kelamin   String    @db.Char(8)
-  is_delete       Boolean   @default(false)
+  id                    String    @id @db.Uuid @default(uuid())
+  nama                  String    @default("") @db.VarChar(255)
+  sekolah               Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id            String    @db.Uuid
+  nomor_induk_sekolah   String?   @db.VarChar(32)
+  nomor_induk_nasional  String?   @db.VarChar(32)
+  kelas                 Int?
+  tanggal_lahir         DateTime?
+  alamat                String?   @db.Text
+  no_ponsel             String?   @db.VarChar(24)
+  tingkat               String?   @db.VarChar(8)
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  tahun_ajaran          String?   @db.VarChar(16)
+  tahun_angkatan        String?   @db.VarChar(4)
+  jenis_kelamin         String    @db.VarChar(8)
+  is_delete             Boolean   @default(false)
 }
 
 model TenagaPendidikanGuru {
-  id              String    @id @db.Uuid
+  id              String    @id @db.Uuid @default(uuid())
   nama            String    @default("") @db.VarChar(255)
-  no_ktp          String    @db.Char(255)
+  no_ktp          String    @db.VarChar(255)
   alamat          String?   @db.Text
-  no_ponsel       String?   @db.Char(24)
+  no_ponsel       String?   @db.VarChar(24)
   ptk             String?   @db.VarChar(255) // mata kelas
-  jenis_kelamin   String    @db.Char(8)
+  jenis_kelamin   String    @db.VarChar(8)
   tanggal_lahir   DateTime?
-  lembaga         Lembaga   @relation(fields: [lembaga_id], references: [id])
-  lembaga_id      String    @db.Uuid
+  sekolah         Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id      String    @db.Uuid
   latar_belakang  String    @db.Text @default("")
   jabatan         String?   @db.VarChar(255)
-  status          String?   @db.Char(8) // pns / honorer / swasta
+  status          String?   @db.VarChar(8) // pns / honorer / swasta
   is_active       Boolean   @default(true)
   is_delete       Boolean   @default(false)
 }
 
 model SaranaPrasarana {
-  id                String    @id @db.Uuid
+  id                String    @id @db.Uuid @default(uuid())
   nama              String
   jumlah            Int?
   jenis             String
   tingkat_kerusakan Int // 1-10
-  lembaga           Lembaga   @relation(fields: [lembaga_id], references: [id])
-  lembaga_id        String    @db.Uuid
+  sekolah           Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id        String    @db.Uuid
   is_bangunan       Boolean   @default(false)
 }
 

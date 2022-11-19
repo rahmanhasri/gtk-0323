@@ -1,11 +1,9 @@
 import express from 'express'
-import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
-import * as utils from './utils.mjs'
+import prisma from '../db.js';
+import * as utils from '../common/utils.js'
 
 const router = express.Router()
-
-const prisma = new PrismaClient()
 
 const userController = {
   all: async (_req, res) => {
@@ -13,10 +11,14 @@ const userController = {
   },
   authentication: async (req, res) => {
     const { username, password } = req.body
-    const user = await prisma.user.findFirst({ where: { username } })
     const errMessage = {
       message: 'User / Password salah'
     }
+
+    if (!username || !password) {
+      return res.status(400).json(errMessage)
+    }
+    const user = await prisma.user.findFirst({ where: { username } })
     if (!user) {
       return res.status(400).json(errMessage)
     }

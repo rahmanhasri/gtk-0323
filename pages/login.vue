@@ -1,37 +1,31 @@
 <template>
-
   <body>
-    <img src="aksen.svg" style="position:absolute; top:0; width:100%" />
-    <img src="buah.png" style="position:absolute; bottom:-60px; width:100%" />
-    <img src="kementan-logo.png" style="position:absolute; width:8%; top:30px; left:20px;" />
     <section>
       <div class="columns is-multiline" style="z-index:1000">
         <div class="column is-8 is-offset-2 register">
           <div class="columns shadowed">
             <div class="column left">
-              <h2 class="title is-3">Sistem Pelayanan Sertifikasi GAP-GHP Hortikultura</h2>
-              <h2 class="subtitle colored is-4">Kementerian Pertanian Republik Indonesia</h2>
+              <h2 class="title is-3">Sistem Dashboard Guru dan Tenaga Kependidikan</h2>
+              <h2 class="subtitle colored is-4">Kabupaten Sampang</h2>
             </div>
             <div class="column right has-text-centered">
               <h1 class="title is-4">Login</h1>
-              <div v-if="error !== null" class="notification is-danger">
-                <button class="delete" @click=" error = null"></button>
-              {{error}} <br> Email / Password salah
+              <div v-if="error" class="notification is-danger">
+                <button class="delete" @click="error = null"></button>
+              Username / Password salah
               </div>
               <form @submit.prevent="login">
                 <div class="field">
                   <div class="control">
-                    <input class="input " type="email" v-model="email" placeholder="Email">
+                    <input v-model="username" class="input " placeholder="Username">
                   </div>
                 </div>
                 <div class="field" style="">
                   <div class="control">
-                    <input class="input " type="password" v-model="password" placeholder="password">
+                    <input v-model="password" class="input " type="password" placeholder="Password">
                   </div>
                 </div>
-                <button type="submit" class="button is-block is-primary is-fullwidth" :class="{ 'is-loading': loading }">Login</button>
-                <br />
-                <small><em>Belum memiliki akun? <nuxt-link to="signup">daftar disini</nuxt-link></em></small>
+                <button type="submit" :loading="loading" class="button is-block is-primary is-fullwidth" :class="{ 'is-loading': loading }">Login</button>
               </form>
             </div>
           </div>
@@ -44,11 +38,10 @@
 
 <script>
   export default {
-    layout: 'login',
     middleware: 'guest',
     data() {
       return {
-        email: '',
+        username: '',
         password: '',
         error: null
       }
@@ -64,15 +57,15 @@
           this.$store.commit('loading');
           const response = await this.$auth.loginWith('local', {
             data: {
-              email: this.email,
+              username: this.username,
               password: this.password,
-              strategy: 'local',
             },
           });
           this.$store.commit('finishLoading');
-          this.$auth.$storage.setUniversal('rolusr', response.data.user.role);
+          this.$auth.$storage.setUniversal('scopeusr', response.data.user.scope);
         } catch (e) {
           this.error = e.message
+          this.$store.commit('finishLoading');
         }
       }
     }
