@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/attributes-order -->
 <template>
   <div class="container">
     <div class="columns">
@@ -67,7 +68,7 @@
         </p>
       </div>
     </div>
-    <table class="table is-fullwidth is-bordered is-striped">
+    <table class="table is-fullwidth is-bordered is-striped is-hoverable">
       <thead>
         <tr>
           <th>No.</th>
@@ -78,13 +79,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in listSekolah" :key="item.id">
-          <td>{{ index + 1 + (page - 1) * limit }}</td>
-          <td>{{ item.nama }}</td>
-          <td>{{ item.jenis }}</td>
-          <td>{{ item.kecamatan }}</td>
-          <td>{{ item.kelurahan_atau_desa }}</td>
-        </tr>
+          <tr v-for="(item, index) in listSekolah" :key="index" @click="$router.push('/sekolah/' + item.id)">
+            <td>{{ index + 1 + (page - 1) * limit }}</td>
+            <td>{{ item.nama }}</td>
+            <td>{{ item.jenis }}</td>
+            <td>{{ item.kecamatan }}</td>
+            <td>{{ item.kelurahan_atau_desa }}</td>
+          </tr>
       </tbody>
     </table>
     <!-- <nav class="pagination" role="navigation" aria-label="pagination">

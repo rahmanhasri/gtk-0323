@@ -1,6 +1,6 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
-import { prisma } from '../db.js';
+import prisma from '../db.js';
 import * as utils from '../common/utils.js'
 
 const router = express.Router()

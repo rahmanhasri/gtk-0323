@@ -48,7 +48,8 @@ async function main() {
         jenis: "swasta",
         koordinat: ["1", "1"],
         created_at: "2022-11-01T18:28:02.178Z",
-        updated_at: "2022-11-01T18:28:30.579Z"
+        updated_at: "2022-11-01T18:28:30.579Z",
+        npsn: '1234',
       }]
     })
   }

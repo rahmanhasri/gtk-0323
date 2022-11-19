@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import path from 'path'
 import jwt from 'jsonwebtoken'
 import * as constant from './constant.js'
 
@@ -62,4 +63,21 @@ export const prismaPagination = (page, limit) => {
     skip: (page - 1) * limit,
     take: +limit,
   }
+}
+
+export const pathResolve = (filePath) => {
+  return path.resolve('server-middleware' + filePath)
+}
+
+export const addQuerySekolahByUserAccess = (reqQuery, user) => {
+  if (user?.level === 'operator') {
+    if (user.scope === 'dinasprov') {
+      return Object.assign(reqQuery, { tingkat: 'SMA' })
+    } else if (user.scope === 'kemenag') {
+      return Object.assign(reqQuery, { is_madrasah: true })
+    } else if (user.scope === 'pendidikan') {
+      return Object.assign(reqQuery, { is_madrasah: false})
+    }
+  }
+  return reqQuery
 }

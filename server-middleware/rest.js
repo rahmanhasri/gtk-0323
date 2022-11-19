@@ -9,6 +9,8 @@ import * as utils from './common/utils.js'
 // routes
 import userRoutes from './controller/user.controller.js'
 import sekolahRoutes from './controller/sekolah.controller.js'
+import dataRoutes from './controller/data.controller.js'
+import siswaRoutes from './controller/siswa.controller.js'
 
 dotenv.config()
 const app = express()
@@ -22,5 +24,7 @@ if (!isProd) {
 
 app.use(userRoutes.path, userRoutes.handler)
 app.use(sekolahRoutes.path, utils.authMiddleware, sekolahRoutes.handler)
+app.use(dataRoutes.path, utils.authMiddleware, dataRoutes.handler)
+app.use(siswaRoutes.path, utils.authMiddleware, siswaRoutes.handler)
 
 export default app
