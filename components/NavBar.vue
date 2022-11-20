@@ -2,7 +2,7 @@
   <nav class="navbar is-success mb-4">
     <div class="container is-fluid">
       <div class="navbar-brand">
-        <a class="navbar-item brand-text"> GTK Admin </a>
+        <a class="navbar-item brand-text" @click="$router.push('/')"> GTK Admin </a>
         <a
           role="button"
           class="navbar-burger"
@@ -22,14 +22,22 @@
         :class="{ 'is-active': isActiveBurger }"
       >
         <div class="navbar-end" :class="{ 'is-hidden': !isActiveBurger }">
-          <a class="navbar-item" href="admin.html"> Home </a>
-          <a class="navbar-item" href="admin.html"> Orders </a>
+          <a class="navbar-item" @click="$router.push('/')"> Home </a>
+          <div class="navbar-item has-dropdown">
+            <a class="navbar-link" @click="navSekolah = !navSekolah"> Sekolah </a>
+            <div class="navbar-dropdown" :class="{'is-hidden': navSekolah }">
+              <a class="navbar-item" @click="$router.push('/tambah-sekolah')">
+                Tambah Sekolah
+              </a>
+              <a class="navbar-item" @click="$router.push('/daftar-sekolah')">
+                Daftar Sekolah
+              </a>
+            </div>
+          </div>
           <a class="navbar-item" @click.prevent="logout"> Logout </a>
         </div>
         <div class="navbar-end" :class="{ 'is-hidden': isActiveBurger }">
-          <a class="navbar-item is-hovered" @click="logout">
-            Logout
-          </a>
+          <a class="navbar-item is-hovered" @click="logout"> Logout </a>
         </div>
       </div>
     </div>
@@ -41,11 +49,15 @@ export default {
   data() {
     return {
       isActiveBurger: false,
+      navSekolah: true,
     }
   },
   mounted() {
     if (process.client) {
-      this.$store.commit('userScope', this.$auth.$storage.getUniversal('scopeusr'))
+      this.$store.commit(
+        'userScope',
+        this.$auth.$storage.getUniversal('scopeusr')
+      )
     }
   },
   methods: {

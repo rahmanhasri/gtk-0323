@@ -97,7 +97,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { LIST_KECAMATAN, LIST_DESA_BY_KECAMATAN } from '@/utils/constants'
+import { LIST_KECAMATAN, LIST_DESA_BY_KECAMATAN } from '@/utils/constants.mjs'
 
 export default {
   layout: 'Dashboard',

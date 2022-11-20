@@ -46,6 +46,7 @@ export default {
     '@nuxtjs/auth',
     '@nuxtjs/toast',
     'nuxt-validate',
+    '@nuxtjs/fontawesome',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -78,6 +79,11 @@ export default {
     theme: 'outline',
 	  position: 'top-center',
 	  duration : 5000,
+  },
+  fontawesome: {
+    icons: {
+      solid: ['faCircleDown', 'faUpload'],
+    }
   },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {}
