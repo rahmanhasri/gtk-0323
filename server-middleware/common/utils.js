@@ -7,9 +7,10 @@ export const errorWrapper = (fn) => async (req, res, next) => {
   try {
     await fn(req, res, next);
   } catch(error) {
-    console.error(`Error happened at ${req.url} : ` + error);
+    console.error(`Error happened at ${req.url} : ` + error.toString());
     res.status(500).json({
       message: constant.INTERNAL_SERVER_ERROR,
+      e: error.toString(),
     })
   }
 }
@@ -80,4 +81,25 @@ export const addQuerySekolahByUserAccess = (reqQuery, user) => {
     }
   }
   return reqQuery
+}
+
+export const validateUploadSekolah = (user, sekolahReqDto) => {
+  if (user?.level === 'operator') {
+    if (user.scope === 'dinasprov') {
+      return sekolahReqDto.tingkat === 'SMA'
+    } else if (user.scope === 'kemenag') {
+      return sekolahReqDto.is_madrasah === true
+    } else if (user.scope === 'pendidikan') {
+      return sekolahReqDto.is_madrasah === false
+    }
+  }
+  return true
+}
+
+export const toStringDateDDMMYY = (inputDate = new Date) => {
+  const date = inputDate.getUTCDate()
+  const month = inputDate.getMonth()
+  const year = inputDate.getFullYear()
+
+  return `${date}-${month + 1}-${String(year).slice(2)}`
 }

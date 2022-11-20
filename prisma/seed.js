@@ -1,7 +1,7 @@
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client')
-
+const sekolahDummy = require('./sekolah.dummy.json')
 
 const prisma = new PrismaClient()
 
@@ -37,20 +37,7 @@ async function main() {
   })
   if (process.env.NODE_ENV !== 'production') {
     await prisma.sekolah.createMany({
-      data: [{
-        id: "018daeac-7803-492a-91ab-e16592c3a238",
-        kecamatan: "test",
-        kelurahan_atau_desa: "lurah atau desa",
-        nama: "lembaga",
-        is_madrasah: false,
-        tingkat: "SMP",
-        profil: "sekolah description",
-        jenis: "swasta",
-        koordinat: ["1", "1"],
-        created_at: "2022-11-01T18:28:02.178Z",
-        updated_at: "2022-11-01T18:28:30.579Z",
-        npsn: '1234',
-      }]
+      data: sekolahDummy
     })
   }
 }

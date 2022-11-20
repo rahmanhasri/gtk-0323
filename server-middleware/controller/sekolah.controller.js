@@ -5,7 +5,7 @@ import * as utils from '../common/utils.js'
 import prisma from '../db.js'
 import { multipart, uploadValidation } from '../common/upload.js'
 import * as excelUtils from '../common/excel.js'
-// import * as allConstant from '../../utils/constants';
+import * as constants from '../common/constant';
 
 const router = express.Router()
 
@@ -37,13 +37,20 @@ const sekolahController = {
   },
   create: async (req, res) => {
     const sekolahReq = utils.pick(req.body, sekolahReqDto)
+    if (!sekolahReq.npsn) {
+      return res.status(400).json({
+        errMessage: 'Npsn dibutuhkan',
+      })
+    }
     const sekolahTerdaftar = await prisma.sekolah.findFirst({
       where: {
         npsn: sekolahReq.npsn
       },
     })
     if (sekolahTerdaftar) {
-      return res.status(400).send('Sekolah dengan npsn sudah terdaftar')
+      return res.status(400).json({
+        errMessage: 'Sekolah dengan npsn sudah terdaftar',
+      })
     }
 
     sekolahReq.id = uuid.v4()
@@ -92,14 +99,22 @@ const sekolahController = {
     })
 
 
-    const workbook = await excelUtils.writeExcel(listSekolah, '/template/template-sekolah.xlsx')
-    return excelUtils.sendWorkBookAsResponse(res, { workbook, fileName: 'list.sekolah.xlsx'})
+    const workbook = await excelUtils.writeExcel(
+      '/templates/template-sekolah.xlsx',
+      listSekolah,
+      constants.SEKOLAH,
+    )
+
+    await excelUtils
+      .sendWorkBookAsResponse(res, { workbook, fileName: 'list-sekolah.xlsx' })
   },
   downloadSekolahTemplate: (_req, res) => {
-    res.sendFile(utils.pathResolve('/template/template-sekolah.xlsx'), (err) => {
+    res.sendFile(utils.pathResolve('/templates/template-sekolah.xlsx'), (err) => {
       if (err) {
         console.error(err)
-        return res.status(500).send('Error saat mengambil template')
+        return res.status(500).json({
+          errMessage: 'Error saat mengambil template',
+        })
       }
     })
   },
@@ -111,6 +126,16 @@ const sekolahController = {
       if (!sekolah[0] || !sekolah[1] || !sekolah[10]) {
         break
       }
+
+      const allowInsert = utils.validateUploadSekolah(
+        req.user,
+        { tingkat: sekolah[6], is_madrasah: sekolah[4] }
+      )
+
+      if (!allowInsert) {
+        continue
+      }
+
       const newSekolah = {
         nama: sekolah[1].trim(),
         kecamatan: sekolah[2].trim(),
@@ -149,6 +174,19 @@ const sekolahController = {
 
     return res.status(201).json(output)
   },
+  findAllSekolahByUserAccess: async (req, res) => {
+    const query = utils.addQuerySekolahByUserAccess({}, req.user)
+    const listSekolah = await prisma.sekolah.findMany({
+      where: {
+        ...query,
+      },
+      select: {
+        id: true,
+        nama: true,
+      }
+    })
+    return res.json(listSekolah)
+  },
 }
 
 router.post('/', utils.errorWrapper(sekolahController.create))
@@ -156,6 +194,7 @@ router.put('/', utils.errorWrapper(sekolahController.update))
 router.get('/', utils.errorWrapper(sekolahController.findListByUserAccess))
 router.get('/download-template', utils.errorWrapper(sekolahController.downloadSekolahTemplate))
 router.get('/download-list', utils.errorWrapper(sekolahController.downloadListByFilterAndUserAccess))
+router.get('/list-name', utils.errorWrapper(sekolahController.findAllSekolahByUserAccess))
 router.get('/:id', utils.errorWrapper(sekolahController.findOne))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(sekolahController.upload))
 

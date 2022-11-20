@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar is-white is-transparent">
+  <nav class="navbar is-success mb-4">
     <div class="container is-fluid">
       <div class="navbar-brand">
         <a class="navbar-item brand-text"> GTK Admin </a>
@@ -27,7 +27,7 @@
           <a class="navbar-item" @click.prevent="logout"> Logout </a>
         </div>
         <div class="navbar-end" :class="{ 'is-hidden': isActiveBurger }">
-          <a class="navbar-item" @click="logout">
+          <a class="navbar-item is-hovered" @click="logout">
             Logout
           </a>
         </div>

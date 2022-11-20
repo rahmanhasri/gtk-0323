@@ -11,6 +11,7 @@ import userRoutes from './controller/user.controller.js'
 import sekolahRoutes from './controller/sekolah.controller.js'
 import dataRoutes from './controller/data.controller.js'
 import siswaRoutes from './controller/siswa.controller.js'
+// import tenagaDanGuruRoutes from './controller/tenaga-guru.controller.js'
 
 dotenv.config()
 const app = express()
