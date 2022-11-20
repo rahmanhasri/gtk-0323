@@ -1,18 +1,25 @@
 <template>
-<div id="map" style="height: 50vh">
- <client-only>
-  <l-map ref="map" :zoom="10" :center="['-7.05', '113.25']">
-    <l-tile-layer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"></l-tile-layer>
-    <l-marker v-for="(item, index) in listCountKecamatan" :key="index" :lat-lng="getKoorKecamatan(item.kecamatan)" >
-    <l-popup>{{ 'Jumlah Sekolah Kec.' + item.kecamatan + ': ' + item.count }}</l-popup>
-    </l-marker>
-  </l-map>
- </client-only>
-</div>
-
+  <div id="map" style="height: 50vh">
+    <client-only>
+      <l-map ref="map" :zoom="10" :center="['-7.05', '113.25']">
+        <l-tile-layer
+          url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+        ></l-tile-layer>
+        <l-marker
+          v-for="(item, index) in listCountKecamatan"
+          :key="index"
+          :lat-lng="getKoorKecamatan(item.kecamatan)"
+        >
+          <l-popup>{{
+            'Jumlah Sekolah Kec.' + item.kecamatan + ': ' + item.count
+          }}</l-popup>
+        </l-marker>
+      </l-map>
+    </client-only>
+  </div>
 </template>
 <script>
-import { LIST_KOOR_KECAMATAN } from '@/utils/constants'
+import { LIST_KOOR_KECAMATAN } from '@/utils/constants.mjs'
 
 export default {
   name: 'IndexPage',
@@ -28,6 +35,11 @@ export default {
       totalSMA: 0,
       totalSMK: 0,
     }
+  },
+  computed: {
+    loading() {
+      return this.$store.state.loading
+    },
   },
   mounted() {
     this.getPresentaseData()
@@ -55,35 +67,33 @@ export default {
         })
     },
     populate(response) {
-      this.listCountKecamatan = response.kecamatan
-      (response.tingkat || []).forEach(item => {
-        if (item.tingkat === 'TK') {
-          this.totalTK = item.count
-        } else if (item.tingkat === 'PAUD') {
-          this.totalPAUD = item.count
-        } else if (item.tingkat === 'SD') {
-          this.totalSD = item.count
-        } else if (item.tingkat === 'SMP') {
-
-          this.totalSMP = item.count
-        } else if (item.tingkat === 'SMA') {
-
-          this.totalSMA = item.count
-        } else if (item.tingkat === 'SMK') {
-
-          this.totalSMK = item.count
-        }
-      })
+      this.listCountKecamatan = response ? response.kecamatan : []
+      response &&
+        (response.tingkat || []).forEach((item) => {
+          if (item.tingkat === 'TK') {
+            this.totalTK = item.count
+          } else if (item.tingkat === 'PAUD') {
+            this.totalPAUD = item.count
+          } else if (item.tingkat === 'SD') {
+            this.totalSD = item.count
+          } else if (item.tingkat === 'SMP') {
+            this.totalSMP = item.count
+          } else if (item.tingkat === 'SMA') {
+            this.totalSMA = item.count
+          } else if (item.tingkat === 'SMK') {
+            this.totalSMK = item.count
+          }
+        })
     },
-    zoomUpdated (zoom) {
-      this.zoom = zoom;
+    zoomUpdated(zoom) {
+      this.zoom = zoom
     },
-    centerUpdated (center) {
-      this.center = center;
+    centerUpdated(center) {
+      this.center = center
     },
-    boundsUpdated (bounds) {
-      this.bounds = bounds;
-    }
+    boundsUpdated(bounds) {
+      this.bounds = bounds
+    },
   },
 }
 </script>

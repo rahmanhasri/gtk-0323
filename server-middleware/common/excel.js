@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs'
 import * as utils from './utils.js'
+import * as constants from './constant.js'
 
 const sekolahExcelColumns = [
   { header: 'No.', key: 'index', width: 5 },
@@ -15,14 +16,46 @@ const sekolahExcelColumns = [
   { header: 'NPSN', key: 'npsn', width: 16 },
 ]
 
-export const writeExcel = async (listSekolah, filePath) => {
+const siswaExcelColumns = [
+  { header: 'No.', key: 'index', width: 5 },
+  { header: 'Nama', key: 'nama', width: 32 },
+  { header: 'NPSN Sekolah', key: 'npsn', width: 20 },
+  { header: 'Nomor Induk Nasional', key: 'nomor_induk_nasional', width: 24 },
+  { header: 'Nomor Induk Sekolah', key: 'nomor_induk_sekolah', width: 24 },
+  { header: 'Tanggal Lahir', key: 'tanggal_lahir', width: 16 },
+  { header: 'Alamat', key: 'alamat', width: 32 },
+  { header: 'Jenis Kelamin', key: 'jenis_kelamin', width: 16 },
+  { header: 'No Ponsel', key: 'no_ponsel', width: 16 },
+  { header: 'Tahun Angkatan', key: 'tahun_angkatan', width: 16 },
+]
+
+export const writeExcel = async (
+  filePath,
+  data,
+  type, // sekolah | siswa
+  isUploadResult = false,
+) => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(utils.pathResolve(filePath));
 
   const worksheet = workbook.getWorksheet('Sheet1')
+
+  if (type === constants.SEKOLAH) {
+    writeExcelSekolah(data, worksheet)
+  }
+
+  if (type === constants.SISWA) {
+    writeExcelSiswa(data, worksheet, isUploadResult)
+  }
+
+
+  return workbook
+}
+
+const writeExcelSekolah = (data, worksheet) => {
   worksheet.columns = sekolahExcelColumns
 
-  for (const [index, sekolah] of listSekolah.entries()) {
+  for (const [index, sekolah] of data.entries()) {
     const row = worksheet.getRow(index + 2)
     row.getCell('index').value = index + 1
     row.getCell('nama').value = sekolah.nama
@@ -36,7 +69,38 @@ export const writeExcel = async (listSekolah, filePath) => {
     row.getCell('latitude').value = sekolah.koordinat.length ? sekolah.koordinat[1] : '-'
     row.getCell('npsn').value = sekolah.npsn || '-'
   }
-  return workbook
+
+  return worksheet
+}
+
+const writeExcelSiswa = (data, worksheet, isUploadResult) => {
+  let columns = siswaExcelColumns
+  if (isUploadResult) {
+    columns = siswaExcelColumns.concat([{
+      header: 'Hasil Upload', key: 'hasil_upload', width: 32
+    }])
+  }
+  worksheet.columns = columns
+
+
+  for (const [index, siswa] of data.entries()) {
+    const row = worksheet.getRow(index + 2)
+    row.getCell('index').value = index + 1
+    row.getCell('nama').value = siswa.nama
+    row.getCell('npsn').value = siswa.npsn || '0'
+    row.getCell('nomor_induk_nasional').value = siswa.nomor_induk_nasional || '-'
+    row.getCell('nomor_induk_sekolah').value = siswa.nomor_induk_sekolah || '-'
+    row.getCell('tanggal_lahir').value = utils.toStringDateDDMMYY(siswa.tanggal_lahir)
+    row.getCell('alamat').value = siswa.alamat || '-'
+    row.getCell('jenis_kelamin').value = siswa.jenis_kelamin || 'Laki-Laki'
+    row.getCell('no_ponsel').value = siswa.no_ponsel || '-'
+    row.getCell('tahun_angkatan').value = siswa.tahun_angkatan || '-'
+    if (isUploadResult) {
+      row.getCell('hasil_upload').value = siswa.hasil_upload
+    }
+  }
+
+  return worksheet
 }
 
 export const sendWorkBookAsResponse = async (

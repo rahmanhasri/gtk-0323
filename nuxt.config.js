@@ -45,6 +45,7 @@ export default {
     'nuxt-buefy',
     '@nuxtjs/auth',
     '@nuxtjs/toast',
+    'nuxt-validate',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -71,6 +72,12 @@ export default {
   redirect: {
     logout: '/login',
     login: '/',
+  },
+
+  toast: {
+    theme: 'outline',
+	  position: 'top-center',
+	  duration : 5000,
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

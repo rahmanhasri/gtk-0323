@@ -46,7 +46,7 @@ model Siswa {
   updated_at            DateTime  @updatedAt
   tahun_ajaran          String?   @db.VarChar(16)
   tahun_angkatan        String?   @db.VarChar(4)
-  jenis_kelamin         String    @db.VarChar(8)
+  jenis_kelamin         String    @db.VarChar(10)
   is_delete             Boolean   @default(false)
 }
 
@@ -54,10 +54,11 @@ model TenagaPendidikanGuru {
   id              String    @id @db.Uuid @default(uuid())
   nama            String    @default("") @db.VarChar(255)
   no_ktp          String    @db.VarChar(255)
+  nuptk           String?    @db.VarChar(32)
   alamat          String?   @db.Text
   no_ponsel       String?   @db.VarChar(24)
   ptk             String?   @db.VarChar(255) // mata kelas
-  jenis_kelamin   String    @db.VarChar(8)
+  jenis_kelamin   String    @db.VarChar(10)
   tanggal_lahir   DateTime?
   sekolah         Sekolah   @relation(fields: [sekolah_id], references: [id])
   sekolah_id      String    @db.Uuid
