@@ -56,7 +56,7 @@ export const authMiddleware = (req, res, next) => {
   next()
 }
 
-export const prismaPagination = (page, limit) => {
+export const prismaPagination = (page, limit = 20) => {
   if (!page) {
     return {}
   }
@@ -98,8 +98,19 @@ export const validateUploadSekolah = (user, sekolahReqDto) => {
 
 export const toStringDateDDMMYY = (inputDate = new Date) => {
   const date = inputDate.getUTCDate()
-  const month = inputDate.getMonth()
+  const month = inputDate.getMonth() + 1
+  const stringMonth = month < 10 ? `0${month}` : String(month)
   const year = inputDate.getFullYear()
 
-  return `${date}-${month + 1}-${String(year).slice(2)}`
+  return `${year}-${stringMonth}-${date}`
+}
+
+export const reduceStringArrayToObjValue = (array, values) => {
+  const isSingleValue = !Array.isArray(values)
+  return array.reduce((prev, current, index) => {
+    if (isSingleValue) {
+      return Object.assign(prev, { [current]: values })
+    }
+    return Object.assign(prev, { [current]: values[index] })
+  }, {})
 }

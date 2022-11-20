@@ -11,6 +11,7 @@
       </ul>
     </div>
     <div v-if="isTabInput" class="columns">
+      <div class="column is-1"></div>
       <ValidationObserver ref="observer" slim>
         <div slot-scope="{ invalid, validate }" class="column is-8" >
           <ValidationProvider rules="required|min:5" name="nama">
@@ -79,6 +80,7 @@
               type="checkbox"
               name="switchNormal"
               class="switch"
+              :disabled="isKemenagUser || isDinasPendidikanUser"
             />
             <label for="switchNormal">Madrasah</label>
           </div>
@@ -88,7 +90,7 @@
             <label class="label">Tingkat</label>
             <div class="control">
               <div class="select" :class="{'is-danger': errors[0] }">
-                <select v-model="tingkat">
+                <select v-model="tingkat" :disabled="isProvinsiUser">
                   <option value="" disabled selected>
                     Pilih Tingkat Sekolah
                   </option>
@@ -178,6 +180,7 @@
 
 <script>
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { mapGetters } from 'vuex'
 import {
   LIST_KECAMATAN,
   LIST_DESA_BY_KECAMATAN,
@@ -206,6 +209,7 @@ export default {
       profil: '',
       is_negeri: false,
       koordinat: DEFAULT_KOOR_SAMPANG || [],
+      // map
       zoomMap: 13,
     }
   },
@@ -222,11 +226,16 @@ export default {
     selectListDesa() {
       return LIST_DESA_BY_KECAMATAN[this.kecamatan] || []
     },
+    ...mapGetters(['isProvinsiUser', 'isDinasPendidikanUser', 'isKemenagUser']),
   },
   watch: {
     kecamatan(value) {
       this.koordinat = LIST_KOOR_KECAMATAN[value] || DEFAULT_KOOR_SAMPANG
     },
+  },
+  mounted() {
+    this.is_madrasah = this.isKemenagUser
+    this.tingkat = this.isProvinsiUser ? 'SMA' : ''
   },
   methods: {
     getListKecamatan() {

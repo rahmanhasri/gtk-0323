@@ -29,6 +29,21 @@ const siswaExcelColumns = [
   { header: 'Tahun Angkatan', key: 'tahun_angkatan', width: 16 },
 ]
 
+const guruExcelColumns = [
+  { header: 'No.', key: 'index', width: 5 },
+  { header: 'Nama', key: 'nama', width: 32 },
+  { header: 'NPSN Sekolah', key: 'npsn', width: 20 },
+  { header: 'No KTP', key: 'no_ktp', width: 20 },
+  { header: 'NUPTK', key: 'nuptk', width: 16 },
+  { header: 'No Ponsel', key: 'no_ponsel', width: 16 },
+  { header: 'Tanggal Lahir', key: 'tanggal_lahir', width: 16 },
+  { header: 'Alamat', key: 'alamat', width: 32 },
+  { header: 'Jenis Kelamin', key: 'jenis_kelamin', width: 16 },
+  { header: 'Mata Kelas PTK', key: 'ptk', width: 16 },
+  { header: 'Latar Belakang', key: 'latar_belakang', width: 20 },
+  { header: 'Jabatan', key: 'jabatan', width: 16 },
+]
+
 export const writeExcel = async (
   filePath,
   data,
@@ -46,6 +61,10 @@ export const writeExcel = async (
 
   if (type === constants.SISWA) {
     writeExcelSiswa(data, worksheet, isUploadResult)
+  }
+
+  if (type === constants.GURU) {
+    writeExcelGuru(data, worksheet, isUploadResult)
   }
 
 
@@ -97,6 +116,37 @@ const writeExcelSiswa = (data, worksheet, isUploadResult) => {
     row.getCell('tahun_angkatan').value = siswa.tahun_angkatan || '-'
     if (isUploadResult) {
       row.getCell('hasil_upload').value = siswa.hasil_upload
+    }
+  }
+
+  return worksheet
+}
+
+const writeExcelGuru = (data, worksheet, isUploadResult) => {
+  let columns = guruExcelColumns
+  if (isUploadResult) {
+    columns = guruExcelColumns.concat([{
+      header: 'Hasil Upload', key: 'hasil_upload', width: 32
+    }])
+  }
+  worksheet.columns = columns
+
+  for (const [index, guru] of data.entries()) {
+    const row = worksheet.getRow(index + 2)
+    row.getCell('index').value = index + 1
+    row.getCell('nama').value = guru.nama || '-'
+    row.getCell('npsn').value = guru.npsn || '0'
+    row.getCell('no_ktp').value = guru.no_ktp || '-'
+    row.getCell('nuptk').value = guru.nuptk || '-'
+    row.getCell('no_ponsel').value = guru.no_ponsel || '-'
+    row.getCell('tanggal_lahir').value = utils.toStringDateDDMMYY(guru.tanggal_lahir)
+    row.getCell('alamat').value = guru.alamat || '-'
+    row.getCell('jenis_kelamin').value = guru.jenis_kelamin || 'Laki-Laki'
+    row.getCell('ptk').value = guru.ptk || '-'
+    row.getCell('latar_belakang').value = guru.latar_belakang || '-'
+    row.getCell('jabatan').value = guru.jabatan || 'Swasta'
+    if (isUploadResult) {
+      row.getCell('hasil_upload').value = guru.hasil_upload
     }
   }
 

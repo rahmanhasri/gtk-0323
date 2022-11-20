@@ -37,6 +37,49 @@ const siswaController = {
 
     return res.json(siswa)
   },
+  findListByUserAccess: async (req, res) => {
+    const { user } = req
+    const query = utils.addQuerySekolahByUserAccess(
+      utils.pick(req.query, ['nama', 'nomor_induk_nasional', 'sekolah_id']),
+      user,
+    )
+
+    const querySiswa = []
+    const querySekolahUserAccess = {}
+    if (query.nama) {
+      querySiswa.push({ nama: { contains: query.nama }})
+    }
+    if (query.nomor_induk_nasional) {
+      querySiswa.push({ nomor_induk_nasional: { contains: query.nomor_induk_nasional }})
+    }
+    if (query.sekolah_id) {
+      querySiswa.push({ sekolah_id: query.sekolah_id })
+    }
+    if (query.tingkat) {
+      querySekolahUserAccess.tingkat = query.tingkat
+    }
+    if (Object.hasOwn(query, 'is_madrasah')) {
+      querySekolahUserAccess.is_madrasah = query.is_madrasah
+    }
+
+    const selectIncludeSiswa = querySiswa.length ? { OR: querySiswa } : {}
+
+    const result = await prisma.sekolah.findMany({
+      where: querySekolahUserAccess,
+      select: {
+        ...(utils.reduceStringArrayToObjValue(['id', 'nama'], true)),
+        daftar_siswa: {
+          where: selectIncludeSiswa,
+          select: {
+            nama: true,
+            nomor_induk_nasional: true,
+            tahun_angkatan: true,
+          }
+        }
+      }
+    })
+    return res.status(200).json(result)
+  },
   create: async (req, res) => {
     const siswaReq = utils.pick(req.body, siswaReqDto)
     if (siswaReq.nomor_induk_nasional) {
@@ -53,7 +96,12 @@ const siswaController = {
       }
     }
 
+    const sekolah = await prisma.sekolah.findFirst({
+      where: { id: siswaReq.sekolah_id }
+    })
+
     siswaReq.id = uuid.v4()
+    siswaReq.tingkat = sekolah?.tingkat
     const created = await prisma.siswa.create({ data: siswaReq })
     return res.status(201).json(created)
   },
@@ -61,7 +109,9 @@ const siswaController = {
     res.sendFile(utils.pathResolve('/templates/template-siswa.xlsx'), (err) => {
       if (err) {
         console.error(err)
-        return res.status(500).send('Error saat mengambil template')
+        return res.status(500).json({
+          errMessage: 'Error saat mengambil template',
+        })
       }
     })
   },
@@ -75,7 +125,6 @@ const siswaController = {
         break
       }
 
-      console.log(siswa)
       const npsnSekolah = String(siswa[2])
       let uploadMessage = 'OK'
       const sekolah = await prisma.sekolah.findFirst({
@@ -91,13 +140,14 @@ const siswaController = {
         nomor_induk_nasional: String(siswa[3]),
         nomor_induk_sekolah: String(siswa[4]),
         tanggal_lahir: new Date(siswa[5]),
-        alamat: String(siswa[6]),
+        alamat: (siswa[6] || '').trim(),
         jenis_kelamin: siswa[7].toUpperCase(),
         no_ponsel: siswa[8].trim(),
         tahun_angkatan: String(siswa[9]),
       }
 
       // TODO: allowInsert
+      // TODO: Upsert by nomor_induk_nasional
       if (!sekolah) {
         uploadMessage = 'GAGAL UPLOAD: NPSN Sekolah tidak terdaftar'
       } else {
@@ -124,10 +174,11 @@ const siswaController = {
 
     await excelUtils
       .sendWorkBookAsResponse(res, { workbook, fileName: 'list-upload-siswa.xlsx' })
-    // return res.status(201).json(output)
   },
 }
 
+router.get('/download-template', utils.errorWrapper(siswaController.downloadSiswaTemplate))
+router.get('/', utils.errorWrapper(siswaController.findListByUserAccess))
 router.get('/:id', utils.errorWrapper(siswaController.findOne))
 router.post('/', utils.errorWrapper(siswaController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(siswaController.upload))

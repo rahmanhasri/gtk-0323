@@ -9,11 +9,24 @@ export const getters = {
 
   loading(state) {
     return state.loading;
+  },
+
+  isProvinsiUser(state) {
+    return state.userScope === 'dinasprov'
+  },
+
+  isDinasPendidikanUser(state) {
+    return state.userScope === 'pendidikan'
+  },
+
+  isKemenagUser(state) {
+    return state.userScope === 'kemenag'
   }
 };
 
 export const state = () => ({
   loading: false,
+  userScope: '',
 });
 
 export const mutations = {
@@ -22,6 +35,9 @@ export const mutations = {
   },
   finishLoading(state) {
     state.loading = false;
+  },
+  userScope(state, userScope) {
+    state.userScope = userScope
   },
 };
 
