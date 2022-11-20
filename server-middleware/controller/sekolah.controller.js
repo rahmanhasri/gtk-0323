@@ -70,7 +70,7 @@ const sekolahController = {
   },
   findListByUserAccess: async (req, res) => {
     const { user } = req;
-    let query = utils.pick(req.query, ['nama', 'tingkat', 'kecamatan', 'desa'])
+    let query = utils.pick(req.query, ['nama', 'tingkat', 'kecamatan', 'kelurahan_atau_desa'])
     query = utils.addQuerySekolahByUserAccess(query, user)
 
     const listSekolah = await prisma.sekolah.findMany({
@@ -82,6 +82,7 @@ const sekolahController = {
         },
       },
     })
+
     return res.json(listSekolah)
   },
   downloadListByFilterAndUserAccess: async (req, res) => {

@@ -6,7 +6,7 @@
         <div class="field">
           <label class="label">Sekolah</label>
           <div class="control">
-            <input class="input" type="text" placeholder="Cari Sekolah" />
+            <input v-model="search" class="input" type="text" placeholder="Cari Sekolah" />
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@
     <div class="columns">
       <div class="column is-12 field">
         <p class="control">
-          <a class="button is-primary" @click="getListSekolah"> Cari </a>
+          <a class="button is-primary" :class="{ 'is-loading': loading }" @click="getListSekolah"> Cari </a>
         </p>
       </div>
     </div>
@@ -79,7 +79,7 @@
         </tr>
       </thead>
       <tbody>
-          <tr v-for="(item, index) in listSekolah" :key="index" @click="$router.push('/sekolah/' + item.id)">
+          <tr v-for="(item, index) in paginatedListSekolah" :key="index" @click="$router.push('/sekolah/' + item.id)">
             <td>{{ index + 1 + (page - 1) * limit }}</td>
             <td>{{ item.nama }}</td>
             <td>{{ item.jenis }}</td>
@@ -88,14 +88,15 @@
           </tr>
       </tbody>
     </table>
-    <!-- <nav class="pagination" role="navigation" aria-label="pagination">
-      <a class="pagination-previous" :class="{ 'is-disabled': page === 1 }" @click.prevent="">Previous</a>
-      <a class="pagination-next">Next page</a>
-    </nav> -->
+    <nav class="pagination" role="navigation" aria-label="pagination">
+      <a class="pagination-previous" :class="{ 'is-disabled': page === 1 }" @click.prevent="turnPage(-1)">Previous</a>
+      <a class="pagination-next" :class="{ 'is-disabled': paginatedListSekolah.length < limit }" @click.prevent="turnPage(1)">Next page</a>
+    </nav>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { LIST_KECAMATAN, LIST_DESA_BY_KECAMATAN } from '@/utils/constants'
 
 export default {
@@ -110,23 +111,46 @@ export default {
       listSekolah: [],
       page: 1,
       limit: 20,
+      //
+      newFilter: false,
     }
   },
   computed: {
     selectListDesa() {
       return LIST_DESA_BY_KECAMATAN[this.kecamatanFilter] || []
     },
-    isProvinsiUser() {
-      return this.$auth.$storage.getUniversal('scopeusr') === 'dinasprov'
-    },
     loading() {
       return this.$store.state.loading
     },
+    paginatedListSekolah() {
+      return this.listSekolah.slice(this.limit * (this.page - 1), this.limit * this.page)
+    },
+    ...mapGetters(['isProvinsiUser']),
+  },
+  watch: {
+    tingkatFilter(_value) {
+      this.newFilter = true
+    },
+    kecamatanFilter(_value) {
+      this.newFilter = true
+    },
+    desaFilter(_value) {
+      this.newFilter = true
+    },
+    search(_value) {
+      this.newFilter = true
+    }
   },
   mounted() {
     this.getListSekolah()
   },
   methods: {
+    turnPage(value) {
+      if (this.page + value > 0) {
+        this.page += value
+      }
+      this.getListSekolah()
+    },
     getListKecamatan() {
       return LIST_KECAMATAN
     },
@@ -143,7 +167,7 @@ export default {
         params.kecamatan = this.kecamatanFilter
       }
       if (this.desaFilter) {
-        params.desa = this.desaFilter
+        params.kelurahan_atau_desa = this.desaFilter
       }
 
       this.$auth
@@ -152,14 +176,23 @@ export default {
           url: '/api/sekolah',
           params: {
             ...params,
-            // TODO: add pagination
-            // page: this.page,
-            // limit: this.limit,
+            page: this.page,
+            limit: this.limit,
           },
         })
         .then((res) => {
           this.$store.commit('finishLoading')
-          this.listSekolah = res
+          if (this.newFilter) {
+            this.newFilter = false
+            this.page = 1
+            this.listSekolah = res
+            return
+          }
+          if (!res.length && this.page !== 1) {
+            this.page--
+            return
+          }
+          this.listSekolah = this.listSekolah.concat(res)
         })
         .catch((err) => {
           this.$store.commit('finishLoading')

@@ -43,6 +43,11 @@ export default {
       isActiveBurger: false,
     }
   },
+  mounted() {
+    if (process.client) {
+      this.$store.commit('userScope', this.$auth.$storage.getUniversal('scopeusr'))
+    }
+  },
   methods: {
     clickBurger() {
       this.isActiveBurger = !this.isActiveBurger

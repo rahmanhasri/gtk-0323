@@ -79,7 +79,6 @@ export default {
 	  position: 'top-center',
 	  duration : 5000,
   },
-
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {}
 }
