@@ -70,11 +70,9 @@ const siswaController = {
         ...(utils.reduceStringArrayToObjValue(['id', 'nama'], true)),
         daftar_siswa: {
           where: selectIncludeSiswa,
-          select: {
-            nama: true,
-            nomor_induk_nasional: true,
-            tahun_angkatan: true,
-          }
+          select: utils.reduceStringArrayToObjValue([
+            'id', 'nama', 'nomor_induk_nasional', 'tingkat', 'jenis_kelamin', 'tahun_angkatan'
+          ], true),
         }
       }
     })
@@ -144,6 +142,7 @@ const siswaController = {
         jenis_kelamin: siswa[7].toUpperCase(),
         no_ponsel: siswa[8].trim(),
         tahun_angkatan: String(siswa[9]),
+        tingkat: sekolah?.tingkat,
       }
 
       // TODO: allowInsert
@@ -175,10 +174,18 @@ const siswaController = {
     await excelUtils
       .sendWorkBookAsResponse(res, { workbook, fileName: 'list-upload-siswa.xlsx' })
   },
+  findSiswaBySekolahId: async (req, res) => {
+    const siswas = await prisma.siswa.findMany({
+      where: { sekolah_id: req.params.id }
+    })
+
+    return res.status(200).json(siswas)
+  }
 }
 
 router.get('/download-template', utils.errorWrapper(siswaController.downloadSiswaTemplate))
 router.get('/', utils.errorWrapper(siswaController.findListByUserAccess))
+router.get('/sekolah/:id', utils.errorWrapper(siswaController.findSiswaBySekolahId))
 router.get('/:id', utils.errorWrapper(siswaController.findOne))
 router.post('/', utils.errorWrapper(siswaController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(siswaController.upload))

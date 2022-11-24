@@ -84,7 +84,7 @@ export default {
     icons: {
       solid: ['faCircleDown', 'faUpload'],
     }
-  },
+  },  
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {}
 }

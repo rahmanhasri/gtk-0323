@@ -1,6 +1,8 @@
 const { PrismaClient } = require('@prisma/client')
 const { faker } = require('@faker-js/faker')
 
+faker.locale = 'id_ID'
+
 const prisma = new PrismaClient()
 
 const generateFakerSekolah = async (count) => {

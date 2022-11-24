@@ -23,6 +23,7 @@ model Sekolah {
   // Negeri Swasta
   npsn                    String @unique @db.VarChar(16)
   koordinat               String[]
+  // no_telp                 String?
   created_at              DateTime  @default(now())
   updated_at              DateTime  @updatedAt
   daftar_siswa            Siswa[]
