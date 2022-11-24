@@ -47,7 +47,7 @@ const siswaController = {
     const querySiswa = []
     const querySekolahUserAccess = {}
     if (query.nama) {
-      querySiswa.push({ nama: { contains: query.nama }})
+      querySiswa.push({ nama: { contains: query.nama, mode: 'insensitive' }})
     }
     if (query.nomor_induk_nasional) {
       querySiswa.push({ nomor_induk_nasional: { contains: query.nomor_induk_nasional }})

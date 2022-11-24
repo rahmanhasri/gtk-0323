@@ -10,7 +10,7 @@
             >Daftar Siswa</a
           >
         </li>
-        <li :class="{ 'is-active': isTabSiswa }">
+        <li :class="{ 'is-active': isTabGuru }">
           <a @click.prevent="() => setTabActive('daftar-guru')">Daftar Guru</a>
         </li>
       </ul>
@@ -42,12 +42,20 @@
       />
     </div>
 
-    <template v-else-if="isTabSiswa">
+    <template v-if="isTabSiswa">
       <TableSiswaVue
         :daftar-siswa="daftarSiswa"
         :page="pageSiswa"
         :limit="20"
-        @turnPage="turnPage($event)"
+        @turnPage="turnPage($event, 'Siswa')"
+      />
+    </template>
+    <template v-if="isTabGuru">
+      <TableGuruVue
+      :daftar-guru="daftarGuru"
+      :page="pageGuru"
+      :limit="20"
+      @turnPage="turnPage($event, 'Guru')"
       />
     </template>
   </div>
@@ -56,12 +64,14 @@
 <script>
 import SekolahFormsVue from '@/components/SekolahForms.vue'
 import TableSiswaVue from '@/components/TableSiswa.vue'
+import TableGuruVue from '@/components/TableGuru.vue'
 
 export default {
   name: 'SekolahDetail',
   components: {
     SekolahFormsVue,
     TableSiswaVue,
+    TableGuruVue,
   },
   layout: 'Dashboard',
   middleware: 'auth',
@@ -83,6 +93,7 @@ export default {
       daftarSiswa: [],
       pageSiswa: 1,
       daftarGuru: [],
+      pageGuru: 1,
     }
   },
   computed: {
@@ -91,6 +102,9 @@ export default {
     },
     isTabSiswa() {
       return this.tabActive === 'daftar-siswa'
+    },
+    isTabGuru() {
+      return this.tabActive === 'daftar-guru'
     },
   },
   async mounted() {
@@ -131,9 +145,9 @@ export default {
           console.log('ERR', err)
         })
     },
-    turnPage(value) {
-      if (this.page + value > 0) {
-        this.page += value
+    turnPage(value, type) {
+      if (this[`page${type}`] + value > 0) {
+        this[`page${type}`] += value
       }
     },
   },

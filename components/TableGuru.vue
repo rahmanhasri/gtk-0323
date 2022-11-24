@@ -1,32 +1,30 @@
 <template>
   <div class="section">
-    <table v-if="daftarSiswa.length > 0" class="table is-fullwidth is-bordered is-striped is-hoverable">
+    <table v-if="daftarGuru.length > 0" class="table is-fullwidth is-bordered is-striped is-hoverable">
       <thead>
         <tr>
           <th>No.</th>
           <th>Nama</th>
-          <th>Nomor Induk Nasional</th>
-          <th>Tingkat</th>
-          <th>Jenis Kelamin</th>
-          <th>Tahun Angkatan</th>
+          <th>Nomor Unik Pendidik dan Tenaga Kependidikan</th>
+          <th>Jabatan</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
         <tr
           v-for="(item, index) in paginatedListSiswa"
           :key="index"
-          @click="$router.push('/siswa/' + item.id)"
+          @click="$router.push('/guru/' + item.id)"
         >
           <td>{{ index + 1 + (page - 1) * limit }}</td>
           <td>{{ item.nama }}</td>
-          <td>{{ item.nomor_induk_nasional }}</td>
-          <td>{{ item.tingkat }}</td>
-          <td>{{ item.jenis_kelamin }}</td>
-          <td>{{ item.tahun_angkatan }}</td>
+          <td>{{ item.nuptk }}</td>
+          <td>{{ item.jabatan }}</td>
+          <td>{{ item.status }}</td>
         </tr>
       </tbody>
     </table>
-    <nav v-if="daftarSiswa.length > 0" class="pagination" role="navigation" aria-label="pagination">
+    <nav v-if="daftarGuru.length > 0" class="pagination" role="navigation" aria-label="pagination">
       <a
         class="pagination-previous"
         :class="{ 'is-disabled': page === 1 }"
@@ -35,20 +33,20 @@
       >
       <a
         class="pagination-next"
-        :class="{ 'is-disabled': paginatedListSiswa.length < limit }"
+        :class="{ 'is-disabled': paginatedListGuru.length < limit }"
         @click.prevent="$emit('turnPage', 1)"
         >Next page</a
       >
     </nav>
-    <p v-else-if="!daftarSiswa.length" class="title is-4"><font-awesome-icon icon="circle-exclamation" /> Daftar Siswa Kosong</p>
+    <p class="title is-4"><font-awesome-icon icon="circle-exclamation" /> Daftar Guru Kosong</p>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'TableSiswa',
+  name: 'TableGuru',
   props: {
-    daftarSiswa: {
+    daftarGuru: {
       type: Array,
       default: Array,
     },
@@ -67,8 +65,8 @@ export default {
     }
   },
   computed: {
-    paginatedListSiswa() {
-      return this.daftarSiswa.slice(this.limit * (this.page - 1), this.limit * this.page)
+    paginatedListGuru() {
+      return this.daftarGuru.slice(this.limit * (this.page - 1), this.limit * this.page)
     },
   }
 }

@@ -82,7 +82,7 @@ export default {
   },
   fontawesome: {
     icons: {
-      solid: ['faCircleDown', 'faUpload'],
+      solid: ['faCircleDown', 'faUpload', 'faCircleExclamation'],
     }
   },  
   // Build Configuration: https://go.nuxtjs.dev/config-build

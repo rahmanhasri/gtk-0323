@@ -36,21 +36,9 @@
 
     <div v-else-if="isTabUnggah" class="section">
       <div class="columns">
-        <div class="column is-4 field">
-          <button
-            class="button is-ghost"
-            :class="{ 'is-loading': loading }"
-            @click.prevent="downloadTemplate"
-          >
-            <span class="icon">
-              <font-awesome-icon icon="circle-down" />
-            </span>
-            <span>Download Template</span>
-          </button>
-        </div>
       </div>
       <div class="columns">
-        <div class="column is-8 field">
+        <div class="column is-4 field">
           <div class="file has-name">
             <label class="file-label">
               <input
@@ -70,6 +58,18 @@
               </span>
             </label>
           </div>
+        </div>
+        <div class="column is-offset-4 is-4 field">
+          <button
+            class="button is-ghost"
+            :class="{ 'is-loading': loading }"
+            @click.prevent="downloadTemplate"
+          >
+            <span class="icon">
+              <font-awesome-icon icon="circle-down" />
+            </span>
+            <span>Download Template</span>
+          </button>
         </div>
       </div>
       <div class="columns">

@@ -79,6 +79,7 @@ const sekolahController = {
         ...query,
         nama: {
           contains: query.nama,
+          mode: 'insensitive',
         },
       },
     })

@@ -135,7 +135,7 @@ const tenagaGuruController = {
     }
 
     if (query.nama) {
-      queryGuru.push({ nama: { contains: query.nama }})
+      queryGuru.push({ nama: { contains: query.nama, mode: 'insensitive' }})
     }
     if (query.nuptk) {
       queryGuru.push({ nuptk: { contains: query.nuptk }})
