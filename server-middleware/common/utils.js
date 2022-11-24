@@ -73,11 +73,11 @@ export const pathResolve = (filePath) => {
 export const addQuerySekolahByUserAccess = (reqQuery, user) => {
   if (user?.level === 'operator') {
     if (user.scope === 'dinasprov') {
-      return Object.assign(reqQuery, { tingkat: 'SMA' })
+      return { ...reqQuery, tingkat: 'SMA' }
     } else if (user.scope === 'kemenag') {
-      return Object.assign(reqQuery, { is_madrasah: true })
+      return { ...reqQuery, is_madrasah: true }
     } else if (user.scope === 'pendidikan') {
-      return Object.assign(reqQuery, { is_madrasah: false})
+      return { ...reqQuery, is_madrasah: false }
     }
   }
   return reqQuery

@@ -28,9 +28,9 @@ const sekolahController = {
     const sekolah = await prisma.sekolah.findFirst({
       where: { id: req.params.id },
       include: {
-        'daftar_siswa': true,
-        'daftar_guru': true,
-        'daftar_sarana_prasarana': true,
+        daftar_siswa: true,
+        daftar_guru: true,
+        daftar_sarana_prasarana: true,
       },
     })
     return res.json(sekolah)
@@ -79,6 +79,7 @@ const sekolahController = {
         ...query,
         nama: {
           contains: query.nama,
+          mode: 'insensitive',
         },
       },
     })

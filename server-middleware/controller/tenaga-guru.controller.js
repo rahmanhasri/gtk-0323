@@ -63,7 +63,6 @@ const tenagaGuruController = {
       if (!tenagaGuru[0] || !tenagaGuru[1]) {
         break
       }
-      console.log(tenagaGuru)
 
       const npsnSekolah = String(tenagaGuru[2])
       let uploadMessage = 'OK'
@@ -119,10 +118,59 @@ const tenagaGuruController = {
       res,
       { workbook, fileName: 'list-upload-tenaga-pendidik-guru.xlsx' },
     )
+  },
+  findListByUserAccess: async (req, res) => {
+    const { user } = req
+    const query = utils.addQuerySekolahByUserAccess(
+      utils.pick(req.query, ['nama', 'nuptk', 'sekolah_id']),
+      user,
+    )
+    const queryGuru = []
+    const querySekolahUserAccess = {}
+    if (query.tingkat) {
+      querySekolahUserAccess.tingkat = query.tingkat
+    }
+    if (Object.hasOwn(query, 'is_madrasah')) {
+      querySekolahUserAccess.is_madrasah = query.is_madrasah
+    }
+
+    if (query.nama) {
+      queryGuru.push({ nama: { contains: query.nama, mode: 'insensitive' }})
+    }
+    if (query.nuptk) {
+      queryGuru.push({ nuptk: { contains: query.nuptk }})
+    }
+    if (query.sekolah_id) {
+      queryGuru.push({ sekolah_id: query.sekolah_id })
+    }
+
+    const result = await prisma.tenagaPendidikanGuru.findMany({
+      where: querySekolahUserAccess,
+      select: {
+        ...(utils.reduceStringArrayToObjValue(['id', 'nama'], true)),
+        daftar_guru: {
+          where: queryGuru.length ? { OR: queryGuru } : {},
+          select: utils.reduceStringArrayToObjValue([
+            'id', 'nama', 'nuptk', 'jabatan', 'status'
+          ], true),
+        }
+      }
+    })
+
+    return res.status(200).json(result)
+  },
+  findGuruBySekolahId: async (req, res) => {
+    const result = await prisma.tenagaPendidikanGuru.findMany({
+      where: { sekolah_id: req.params.id }
+    })
+
+    return res.status(200).json(result)
   }
 }
 
 router.get('/download-template', utils.errorWrapper(tenagaGuruController.downloadTenagaGuruTemplate))
+router.get('/', utils.errorWrapper(tenagaGuruController.findListByUserAccess))
+router.get('/sekolah/:id', utils.errorWrapper(tenagaGuruController.findGuruBySekolahId))
 router.get('/:id', utils.errorWrapper(tenagaGuruController.findOne))
 router.post('/', utils.errorWrapper(tenagaGuruController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(tenagaGuruController.upload))

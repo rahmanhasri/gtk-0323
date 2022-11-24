@@ -30,14 +30,28 @@
         </ul>
       </li>
       <li>
-        <a
+        <NuxtLink
           :class="{ 'is-active': isActiveGuru }"
-          href="/tenaga-kependidikan-guru"
-          >Tenaga Kependidikan Dan Guru</a
-        >
+          to="/guru/daftar"
+          >Tenaga Kependidikan Dan Guru
+        </NuxtLink>
+        <ul :class="{ 'is-hidden': !isActiveGuru }">
+          <li>
+            <NuxtLink
+              to="/guru/daftar"
+              :class="{ 'is-disabled': $route.name === 'guru-daftar' }"
+            >
+              Daftar
+            </NuxtLink>
+          </li>
+        </ul>
       </li>
       <li>
-        <a :class="{ 'is-active': isActiveMurid }" href="/murid">Murid</a>
+        <a
+          :class="{ 'is-active': isActiveMurid }"
+          to="/siswa/daftar">
+          Siswa
+        </a>
       </li>
     </ul>
   </aside>
@@ -49,6 +63,9 @@ export default {
     return {
       menu: 'beranda',
     }
+  },
+  mounted() {
+    console.log(this.$route.name)
   },
   computed: {
     isActiveBeranda() {
