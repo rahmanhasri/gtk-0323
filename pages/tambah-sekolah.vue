@@ -121,6 +121,7 @@ export default {
       koordinat: [],
       // upload
       fileName: '......',
+      file: null,
     }
   },
   computed: {
@@ -142,7 +143,7 @@ export default {
       this.koordinat = LIST_KOOR_KECAMATAN[value] || DEFAULT_KOOR_SAMPANG
     },
   },
-  mounted() {
+  beforeMount() {
     this.is_madrasah = this.isKemenagUser
     this.tingkat = this.isProvinsiUser ? 'SMA' : ''
   },
@@ -156,9 +157,9 @@ export default {
       this.nama = sekolah.nama || ''
       this.npsn = sekolah.npsn || ''
       this.kecamatan = sekolah.kecamatan || ''
-      this.desa = sekolah.kelurahan_atau_dsa || ''
+      this.desa = sekolah.kelurahan_atau_desa || ''
       this.isMadrasah = sekolah.is_madrasah || false
-      this.tingkat = sekolah.tingkat || ''
+      this.tingkat = sekolah.tingkat || this.isProvinsiUser ? 'SMA' : ''
       this.profil = sekolah.profil || ''
       this.isNegeri = sekolah.negeri || false
     },
@@ -211,14 +212,22 @@ export default {
     previewFiles(e) {
       const file = e.target.files[0]
       this.fileName = file.name
+      this.file = file
     },
     submitUpload() {
+      if (!this.file) {
+        this.$toast.error('Dibutuhkan satu file untuk upload')
+        return
+      }
+      const formData = new FormData();
+      formData.append('file', this.file)
       this.$store.commit('loading')
       this.$auth
         .requestWith('local', {
           method: 'POST',
           url: '/api/sekolah/upload',
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { 'Content-Type': 'multipart/form-data' },
+          data: formData,
         })
         .then(res => {
           this.$store.commit('finishLoading')

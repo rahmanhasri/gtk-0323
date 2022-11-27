@@ -81,7 +81,7 @@
           <a
             class="button is-primary"
             :class="{ 'is-loading': loading }"
-            @click="getListGuru"
+            @click="getListGuru(true)"
           >
             Cari
           </a>
@@ -165,20 +165,6 @@ export default {
       })
     },
   },
-  watch: {
-    tingkatFilter(_value) {
-      this.newFilter = true
-    },
-    sekolahIdFilter(_value) {
-      this.newFilter = true
-    },
-    search(_value) {
-      this.newFilter = true
-    },
-    nuptkFilter(_value) {
-      this.newFilter = true
-    },
-  },
   mounted() {
     this.getListGuru()
     this.getListSekolahFilter()
@@ -187,8 +173,11 @@ export default {
     turnPage(value) {
       if (this.page + value > 0) {
         this.page += value
+        if (this.page > this.maxLoadedPage) {
+          this.maxLoadedPage++
+          this.getListGuru()
+        }
       }
-      this.getListGuru()
     },
     changeTingkatSekolah(value) {
       this.tingkatFilter = value
@@ -196,7 +185,8 @@ export default {
     changeSekolahId(value) {
       this.sekolahIdFilter = value
     },
-    getListGuru() {
+    getListGuru(isNewFilter = false) {
+      this.newFilter = isNewFilter
       this.$store.commit('loading')
       const params = {}
       if (this.search) {
@@ -205,7 +195,7 @@ export default {
       if (this.nuptk) {
         params.nuptk = this.nuptk
       }
-      if (this.sekolahId) {
+      if (this.sekolahIdFilter) {
         params.sekolah_id = this.sekolahIdFilter
       }
       this.$auth
@@ -219,18 +209,15 @@ export default {
           },
         })
         .then((res) => {
+          this.$store.commit('finishLoading')
           if (this.newFilter) {
             this.newFilter = false
+            this.maxLoadedPage = 1
             this.page = 1
             this.daftarGuru = res
             return
           }
-          if (!res.length && this.page !== 1) {
-            this.page--
-            return
-          }
           this.daftarGuru = this.daftarGuru.concat(res)
-          this.$store.commit('finishLoading')
         })
         .catch((err) => {
           this.$store.commit('finishLoading')

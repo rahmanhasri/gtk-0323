@@ -18,7 +18,10 @@
       </ul>
     </div>
     <div v-if="isTabEdit" class="section">
+      <progress v-if="loading" class="progress is-small is-primary" max="100" />
+
       <SekolahFormsVue
+        v-else
         :nama="nama"
         :npsn="npsn"
         :kecamatan="kecamatan"
@@ -180,7 +183,7 @@ export default {
   middleware: 'auth',
   data() {
     return {
-      tabActive: 'daftar-guru',
+      tabActive: 'detail',
       editable: false,
       loadingSekolah: false,
       loadingGuru: false,
@@ -199,9 +202,11 @@ export default {
       daftarSiswa: [],
       pageSiswa: 1,
       limitSiswa: 40,
+      maxLoadedPageSiswa: 1,
       daftarGuru: [],
       pageGuru: 1,
       limitGuru: 40,
+      maxLoadedPageGuru: 1,
       daftarSaranaPrasarana: [],
       pageSarana: 1,
       // input
@@ -235,8 +240,12 @@ export default {
         this.limitSiswa * this.pageSiswa
       )
     },
+    loading() {
+      return this.loadingGuru || this.loadingSekolah || this.loadingSiswa
+    }
   },
-  mounted() {
+  watch: {},
+  beforeMount() {
     this.getDetailSekolah()
     this.getListGuru()
     this.getListSiswa()
@@ -250,6 +259,19 @@ export default {
     turnPage(value, type) {
       if (this[`page${type}`] + value > 0) {
         this[`page${type}`] += value
+        if (
+          type === 'Guru' &&
+          this.pageGuru > this.maxLoadedPageGuru
+        ) {
+          this.maxLoadedPageGuru++
+          this.getListGuru()
+        } else if (
+          type === 'Siswa' &&
+          this.pageSiswa  > this.maxLoadedPageSiswa
+        ) {
+          this.maxLoadedPageSiswa++
+          this.getListSiswa()
+        }
       }
     },
     populateSekolah(sekolah = {}) {
@@ -307,6 +329,7 @@ export default {
           if (this.newFilterGuru) {
             this.newFilterGuru = false
             this.pageGuru = 1
+            this.maxLoadedPageGuru = 1
             this.daftarGuru = res
             return
           }
@@ -342,14 +365,12 @@ export default {
           this.loadingSiswa = false
           if (this.newFilterSiswa) {
             this.newFilterSiswa = false
+            this.maxLoadedPageSiswa = 1
             this.pageSiswa = 1
             this.daftarSiswa = res
             return
           }
-          if (!res.length && this.pageSiswa !== 1) {
-            this.pageSiswa--
-            return
-          }
+
           this.daftarSiswa = this.daftarSiswa.concat(res)
         })
         .catch((err) => {

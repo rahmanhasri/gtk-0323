@@ -1,9 +1,5 @@
 <template>
-  <ValidationObserver
-    ref="observer"
-    v-slot="{ validate, invalid }"
-    tag="form"
-  >
+  <ValidationObserver ref="observer" v-slot="{ validate, invalid, reset }" tag="form">
     <div class="columns">
       <ValidationProvider
         rules="required|min:5"
@@ -15,18 +11,17 @@
           <label class="label">Nama Tenaga Pendidik / Guru</label>
           <div class="control">
             <input
+              v-model="form.nama"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="Nama"
-              :value="nama"
               @change="$emit('changeNama', $event.target.value)"
             />
           </div>
         </div>
       </ValidationProvider>
     </div>
-
 
     <div class="columns">
       <ValidationProvider
@@ -39,18 +34,17 @@
           <label class="label">No KTP</label>
           <div class="control">
             <input
+              v-model="form.noKtp"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="No KTP"
-              :value="noKtp"
               @change="$emit('changeNoKtp', $event.target.value)"
             />
           </div>
         </div>
       </ValidationProvider>
     </div>
-
 
     <div class="columns">
       <ValidationProvider
@@ -63,11 +57,11 @@
           <label class="label">NUPTK</label>
           <div class="control">
             <input
+              v-model="form.nuptk"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan"
-              :value="nuptk"
               @change="$emit('changeNuptk', $event.target.value)"
             />
           </div>
@@ -75,10 +69,9 @@
       </ValidationProvider>
     </div>
 
-
     <div class="columns">
       <ValidationProvider
-        rules="required|min:5"
+        rules="required|min:7"
         name="alamat"
         tag="div"
         class="column is-8"
@@ -87,18 +80,17 @@
           <label class="label">Alamat</label>
           <div class="control">
             <input
+              v-model="form.alamat"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="Alamat Guru"
-              :value="alamat"
-              @change="$emit('changeAlamatGuru', $event.target.value)"
+              @change="$emit('changeAlamat', $event.target.value)"
             />
           </div>
         </div>
       </ValidationProvider>
     </div>
-
 
     <div class="columns">
       <ValidationProvider
@@ -111,18 +103,17 @@
           <label class="label">No Ponsel</label>
           <div class="control">
             <input
+              v-model="form.noPonsel"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="No Ponsel"
-              :value="noPonsel"
               @change="$emit('changeNoPonsel', $event.target.value)"
             />
           </div>
         </div>
       </ValidationProvider>
     </div>
-
 
     <div class="columns">
       <ValidationProvider
@@ -135,18 +126,17 @@
           <label class="label">Mata Pelajaran</label>
           <div class="control">
             <input
+              v-model="form.ptk"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="Mata Pelajaran"
-              :value="ptk"
               @change="$emit('changePtk', $event.target.value)"
             />
           </div>
         </div>
       </ValidationProvider>
     </div>
-
 
     <div class="columns">
       <ValidationProvider
@@ -155,17 +145,15 @@
         tag="div"
         class="column is-3"
       >
-        <div slot-scope="{ }" class="field">
+        <div slot-scope="{ errors }" class="field">
           <label class="label">Jenis Kelamin</label>
           <div class="control">
             <div class="select" :class="{ 'is-danger': errors[0] }">
               <select
-                :value="jenisKelamin"
+                v-model="form.jenisKelamin"
                 @change="$emit('changeJenisKelamin', $event.target.value)"
               >
-                <option value="" disabled selected>
-                  Pilih Jenis
-                </option>
+                <option value="" disabled selected>Pilih Jenis</option>
                 <option value="LAKI-LAKI">Laki-laki</option>
                 <option value="PEREMPUAN">Perempuan</option>
               </select>
@@ -175,7 +163,49 @@
       </ValidationProvider>
     </div>
 
-    <!-- TODO: DROPDOWN SEKOLAH -->
+    <div class="columns">
+      <ValidationProvider
+        rules="required"
+        name="sekolah_id"
+        tag="div"
+        class="column is-5"
+      >
+        <div slot-scope="{ errors }" class="dropdown" :class="{ 'is-active': isActiveSekolahDropdown }">
+          <div class="dropdown-trigger">
+            <div class="field">
+              <label class="label">Sekolah</label>
+              <p class="control is-expanded has-icons-right">
+                <input
+                  v-model="searchSekolah"
+                  class="input"
+                  type="search"
+                  placeholder="Ketik nama sekolah"
+                  :class="{ 'is-danger': errors[0] }"
+                  @focusin="isActiveSekolahDropdown = true"
+                />
+                <span class="icon is-small is-right"
+                  ><font-awesome-icon
+                    icon="magnifying-glass"
+                    style="height: 20px"
+                /></span>
+              </p>
+            </div>
+          </div>
+          <div class="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+              <a
+                v-for="sekolah in limitedDaftarSekolah"
+                :key="sekolah.id + '_opt'"
+                class="dropdown-item"
+                @click.prevent="pickSekolah(sekolah)"
+              >
+                {{ sekolah.nama }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </ValidationProvider>
+    </div>
 
     <div class="columns">
       <ValidationProvider
@@ -188,11 +218,11 @@
           <label class="label">Jabatan</label>
           <div class="control">
             <input
+              v-model="form.jabatan"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="Jabatan"
-              :value="jabatan"
               @change="$emit('changeJabatan', $event.target.value)"
             />
           </div>
@@ -200,10 +230,9 @@
       </ValidationProvider>
     </div>
 
-
     <div class="columns">
       <ValidationProvider
-        rules="required|min:5"
+        rules="required"
         name="ptk"
         tag="div"
         class="column is-4"
@@ -213,12 +242,10 @@
           <div class="control">
             <div class="select" :class="{ 'is-danger': errors[0] }">
               <select
-                :value="status"
+                v-model="form.status"
                 @change="$emit('changeStatus', $event.target.value)"
               >
-                <option value="" disabled selected>
-                  Pilih Status
-                </option>
+                <option value="" disabled selected>Pilih Status</option>
                 <option value="PNS">PNS</option>
                 <option value="SWASTA">Swasta</option>
                 <option value="HONORER">Honorer</option>
@@ -237,7 +264,7 @@
               :class="{ 'is-loading': loading }"
               class="button is-primary"
               :disabled="invalid"
-              @click="validate().then(() => $emit('submitInsert'))"
+              @click="validate().then(() => submitInsert(reset))"
             >
               Submit
             </button>
@@ -252,19 +279,8 @@
 import { mapGetters } from 'vuex'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 // const guruReqDto = [
-//   'id',
-//   'nama',
-//   'no_ktp',
-//   'nuptk',
-//   'alamat',
-//   'no_ponsel',
-//   'ptk',
-//   'jenis_kelamin',
 //   'tanggal_lahir', // TODO:
-//   'sekolah_id',
 //   'latar_belakang', // TODO:
-//   'jabatan',
-//   'status',
 // ]
 export default {
   name: 'GuruForms',
@@ -283,21 +299,60 @@ export default {
     sekolahId: { type: String, default: '' },
     jabatan: { type: String, default: '' },
     status: { type: String, default: '' },
+    sekolahName: { type: String, default: '' },
+    isSubmit: { type: Boolean, default: true },
+    daftarSekolah: { type: Array, default: Array },
   },
   data() {
-    return {}
+    return {
+      isActiveSekolahDropdown: false,
+      searchSekolah: this.sekolahName || '',
+      form: {
+        nama: this.nama,
+        noKtp: this.noKtp,
+        nuptk: this.nuptk,
+        alamat: this.alamat,
+        noPonsel: this.noPonsel,
+        ptk: this.ptk,
+        jenisKelamin: this.jenisKelamin,
+        sekolahId: this.sekolahId,
+        jabatan: this.jabatan,
+        status: this.status,
+      },
+    }
   },
   computed: {
+    limitedDaftarSekolah() {
+      return this.daftarSekolah
+        .filter(
+          sekolah => sekolah
+            .nama
+            .toLowerCase()
+            .includes(this.searchSekolah.toLowerCase())
+        )
+        .slice(0, 8)
+    },
     ...mapGetters([
       'isProvinsiUser',
       'isDinasPendidikanUser',
       'isKemenagUser',
       'loading',
     ]),
-  }
+  },
+  mounted() { },
+  methods: {
+    pickSekolah(value) {
+      // this.sekolahId = value
+      this.$emit('changeSekolahId', value.id)
+      this.searchSekolah = value.nama
+      this.isActiveSekolahDropdown = false
+    },
+    submitInsert(reset) {
+      this.$emit('submitInsert')
+      reset()
+    }
+  },
 }
 </script>
 
-<style>
-
-</style>
+<style></style>
