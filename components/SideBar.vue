@@ -44,6 +44,14 @@
               Daftar
             </NuxtLink>
           </li>
+          <li>
+            <NuxtLink
+              to="/guru/tambah"
+              :class="{ 'is-disabled': $route.name === 'guru-tambah' }"
+            >
+              Tambah
+            </NuxtLink>
+          </li>
         </ul>
       </li>
       <li>
@@ -63,9 +71,6 @@ export default {
     return {
       menu: 'beranda',
     }
-  },
-  mounted() {
-    console.log(this.$route.name)
   },
   computed: {
     isActiveBeranda() {

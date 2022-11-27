@@ -135,7 +135,7 @@ const writeExcelGuru = (data, worksheet, isUploadResult) => {
     const row = worksheet.getRow(index + 2)
     row.getCell('index').value = index + 1
     row.getCell('nama').value = guru.nama || '-'
-    row.getCell('npsn').value = guru.npsn || '0'
+    row.getCell('npsn').value = guru.sekolah?.npsn || '0'
     row.getCell('no_ktp').value = guru.no_ktp || '-'
     row.getCell('nuptk').value = guru.nuptk || '-'
     row.getCell('no_ponsel').value = guru.no_ponsel || '-'

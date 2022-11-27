@@ -40,7 +40,7 @@ const siswaController = {
   findListByUserAccess: async (req, res) => {
     const { user } = req
     const query = utils.addQuerySekolahByUserAccess(
-      utils.pick(req.query, ['nama', 'nomor_induk_nasional', 'sekolah_id']),
+      utils.pick(req.query, ['nama', 'nomor_induk_nasional', 'sekolah_id', 'tahun_angkatan']),
       user,
     )
 
@@ -52,9 +52,6 @@ const siswaController = {
     if (query.nomor_induk_nasional) {
       querySiswa.push({ nomor_induk_nasional: { contains: query.nomor_induk_nasional }})
     }
-    if (query.sekolah_id) {
-      querySiswa.push({ sekolah_id: query.sekolah_id })
-    }
     if (query.tingkat) {
       querySekolahUserAccess.tingkat = query.tingkat
     }
@@ -62,17 +59,27 @@ const siswaController = {
       querySekolahUserAccess.is_madrasah = query.is_madrasah
     }
 
-    const selectIncludeSiswa = querySiswa.length ? { OR: querySiswa } : {}
+    const whereCondition = { sekolah: querySekolahUserAccess }
 
-    const result = await prisma.sekolah.findMany({
-      where: querySekolahUserAccess,
+    if (querySiswa.length) {
+      whereCondition.OR = querySiswa
+    }
+
+    if (query.sekolah_id) {
+      whereCondition.AND = [{ sekolah_id: query.sekolah_id }]
+    }
+
+    if (query.tahun_angkatan) {
+      whereCondition.AND = (whereCondition.AND || []).concat([{ tahun_angkatan: query.tahun_angkatan }])
+    }
+    const result = await prisma.siswa.findMany({
+      where: whereCondition,
       select: {
-        ...(utils.reduceStringArrayToObjValue(['id', 'nama'], true)),
-        daftar_siswa: {
-          where: selectIncludeSiswa,
-          select: utils.reduceStringArrayToObjValue([
-            'id', 'nama', 'nomor_induk_nasional', 'tingkat', 'jenis_kelamin', 'tahun_angkatan'
-          ], true),
+        ...utils.reduceStringArrayToObjValue([
+          'id', 'nama', 'nomor_induk_nasional', 'tingkat', 'jenis_kelamin', 'tahun_angkatan'
+        ], true),
+        sekolah: {
+          select: utils.reduceStringArrayToObjValue(['id', 'nama'], true),
         }
       }
     })
@@ -174,18 +181,10 @@ const siswaController = {
     await excelUtils
       .sendWorkBookAsResponse(res, { workbook, fileName: 'list-upload-siswa.xlsx' })
   },
-  findSiswaBySekolahId: async (req, res) => {
-    const siswas = await prisma.siswa.findMany({
-      where: { sekolah_id: req.params.id }
-    })
-
-    return res.status(200).json(siswas)
-  }
 }
 
 router.get('/download-template', utils.errorWrapper(siswaController.downloadSiswaTemplate))
 router.get('/', utils.errorWrapper(siswaController.findListByUserAccess))
-router.get('/sekolah/:id', utils.errorWrapper(siswaController.findSiswaBySekolahId))
 router.get('/:id', utils.errorWrapper(siswaController.findOne))
 router.post('/', utils.errorWrapper(siswaController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(siswaController.upload))

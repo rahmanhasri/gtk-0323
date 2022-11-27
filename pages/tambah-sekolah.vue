@@ -174,7 +174,7 @@ export default {
             kecamatan: this.kecamatan,
             kelurahan_atau_desa: this.desa,
             is_madrasah: this.isMadrasah,
-            tingkat: this.tingkat,
+            tingkat: this.isProvinsiUser ? 'SMA' : this.tingkat,
             profil: this.profil,
             jenis: this.isNegeri ? 'negeri' : 'swasta',
             koordinat: this.koordinat,

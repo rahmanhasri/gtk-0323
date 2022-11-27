@@ -1,5 +1,9 @@
 <template>
-  <ValidationObserver ref="observer" tag="form">
+  <ValidationObserver
+    ref="observer"
+    v-slot="{ validate, invalid }"
+    tag="form"
+  >
     <div class="columns">
       <ValidationProvider
         rules="required|min:5"

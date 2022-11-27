@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/attributes-order -->
 <template>
   <div class="container">
     <div class="columns">
