@@ -1,21 +1,25 @@
 <template>
-  <ValidationObserver ref="observer" tag="form">
+  <ValidationObserver
+    ref="observer"
+    v-slot="{ validate, invalid, reset }"
+  >
     <div class="columns">
       <ValidationProvider
+        v-slot="{ errors }"
         rules="required|min:5"
         name="nama"
         tag="div"
         class="column is-8"
       >
-        <div slot-scope="{ errors }" class="field">
+        <div class="field">
           <label class="label">Nama Sekolah</label>
           <div class="control">
             <input
+              v-model="form.nama"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
               placeholder="Nama Sekolah"
-              :value="nama"
               :readonly="viewOnly"
               @change="$emit('changeNama', $event.target.value)"
             />
@@ -51,8 +55,8 @@
           <div class="control">
             <div class="select" :class="{ 'is-danger': errors[0] }">
               <select
+                v-model="form.kecamatan"
                 :disabled="viewOnly"
-                :value="kecamatan"
                 @change="$emit('changeKecamatan', $event.target.value)"
               >
                 <option value="" disabled selected>Pilih Kecamatan</option>
@@ -78,8 +82,8 @@
           <div class="control">
             <div class="select" :class="{ 'is-danger': errors[0] }">
               <select
+                v-model="form.desa"
                 :disabled="viewOnly"
-                :value="desa"
                 @change="$emit('changeDesa', $event.target.value)"
               >
                 <option value="" disabled selected>
@@ -129,8 +133,8 @@
           <div class="control">
             <div class="select" :class="{ 'is-danger': errors[0] }">
               <select
+                v-model="form.tingkat"
                 :disabled="isProvinsiUser || viewOnly"
-                :value="tingkat"
                 @change="$emit('changeTingkat', $event.target.value)"
               >
                 <option value="" disabled selected>
@@ -160,12 +164,12 @@
           <label class="label">Nomor Pokok Sekolah Nasional</label>
           <div class="control">
             <input
+              v-model="form.npsn"
               label="npsn"
               class="input"
               :class="{ 'is-danger': errors[0] }"
               type="text"
               placeholder="NPSN"
-              :value="npsn"
               :readonly="viewOnly"
               @change="$emit('changeNpsn', $event.target.value)"
             />
@@ -180,9 +184,9 @@
           <label class="label">Profil Sekolah</label>
           <div class="control">
             <textarea
+              v-model="form.profil"
               class="textarea"
               placeholder="Profil Sekolah"
-              :value="profil"
               :readonly="viewOnly"
               @change="$emit('changeProfil', $event.target.value)"
             ></textarea>
@@ -231,12 +235,24 @@
         <div v-if="isSubmit" class="field">
           <div class="control">
             <button
+              :disabled="invalid"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              :disabled="invalid"
-              @click="validate().then(() => $emit('submitInsert'))"
+              @click="validate().then(() => submitInsert(reset))"
             >
               Submit
+            </button>
+          </div>
+        </div>
+        <div v-else class="field">
+          <div class="control">
+              <!-- :disabled="invalid" -->
+            <button
+              :class="{ 'is-loading': loading }"
+              class="button is-primary"
+              @click="validate().then(() => $emit('submitEdit'))"
+            >
+              Save
             </button>
           </div>
         </div>
@@ -267,7 +283,7 @@ export default {
     kecamatan: { type: String, default: '' },
     desa: { type: String, default: '' },
     isMadrasah: { type: Boolean, default: false },
-    tingkat: { type: String, default: '' },
+    tingkat: { type: String, default: 'SMA' },
     profil: { type: String, default: '' },
     isNegeri: { type: Boolean, default: false },
     // menu
@@ -278,6 +294,15 @@ export default {
   data() {
     return {
       koordinat: DEFAULT_KOOR_SAMPANG || [],
+      form: {
+        nama: this.nama,
+        npsn: this.npsn,
+        kecamatan: this.kecamatan,
+        desa: this.desa,
+        isMadrasah: this.isMadrasah,
+        tingkat: this.tingkat,
+        isNegeri: this.isNegeri,
+      }
     }
   },
   computed: {
@@ -291,6 +316,9 @@ export default {
       'loading',
     ]),
   },
+  mounted() {
+
+  },
   methods: {
     getListKecamatan() {
       return LIST_KECAMATAN
@@ -300,6 +328,19 @@ export default {
       this.koordinat = [lat, lng]
       this.$emit('changeKoordinat', [lat, lng])
     },
+    submitInsert(reset) {
+      this.$emit('submitInsert')
+      this.form = {
+        nama: '',
+        npsn: '',
+        kecamatan: '',
+        desa: '',
+        isMadrasah: false,
+        tingkat: this.tingkat,
+        isNegeri: false,
+      }
+      reset()
+    }
   },
 }
 </script>

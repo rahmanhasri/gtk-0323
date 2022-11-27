@@ -26,6 +26,57 @@ const guruReqDto = [
   'status',
 ]
 
+const actionGuru = {
+  findListByUserAccess: async (req) => {
+    const { user } = req
+    const query = utils.addQuerySekolahByUserAccess(
+      utils.pick(req.query, ['nama', 'nuptk', 'sekolah_id', 'status']),
+      user,
+    )
+    const queryGuru = []
+    const querySekolahUserAccess = {}
+    if (query.tingkat) {
+      querySekolahUserAccess.tingkat = query.tingkat
+    }
+    if (Object.hasOwn(query, 'is_madrasah')) {
+      querySekolahUserAccess.is_madrasah = query.is_madrasah
+    }
+
+    if (query.nama) {
+      queryGuru.push({ nama: { contains: query.nama, mode: 'insensitive' }})
+    }
+    if (query.nuptk) {
+      queryGuru.push({ nuptk: { contains: query.nuptk, mode: 'insensitive' } })
+    }
+
+
+    const whereCondition = { sekolah: querySekolahUserAccess }
+
+    if (queryGuru.length) {
+      whereCondition.OR = queryGuru
+    }
+    if (query.sekolah_id) {
+      whereCondition.AND = [{ sekolah_id: query.sekolah_id }]
+    }
+
+    if (query.status) {
+      whereCondition.AND = (whereCondition.AND || []).concat([{ status: query.status }])
+    }
+
+    const list = await prisma.tenagaPendidikanGuru.findMany({
+      ...utils.prismaPagination(req.query.page, req.query.limit),
+      where: whereCondition,
+      select: {
+        ...(utils.reduceStringArrayToObjValue(['id', 'nama', 'jabatan', 'status', 'nuptk'], true)),
+        sekolah: {
+          select: utils.reduceStringArrayToObjValue(['id', 'nama', 'npsn'], true),
+        },
+      },
+    })
+    return list
+  }
+}
+
 const tenagaGuruController = {
   findOne: async (req, res) => {
     const tenagaGuru = await prisma.tenagaPendidikanGuru.findFirst({
@@ -79,7 +130,7 @@ const tenagaGuruController = {
         no_ktp: String(tenagaGuru[3]),
         nuptk: String(tenagaGuru[4]),
         no_ponsel: tenagaGuru[5].trim(),
-        tanggal_lahir: new Date(tenagaGuru[6]),
+        // tanggal_lahir: new Date(tenagaGuru[6]),
         alamat: (tenagaGuru[7] || '').trim(),
         jenis_kelamin: tenagaGuru[8].toUpperCase(),
         ptk: (tenagaGuru[9] || ''),
@@ -120,44 +171,9 @@ const tenagaGuruController = {
     )
   },
   findListByUserAccess: async (req, res) => {
-    const { user } = req
-    const query = utils.addQuerySekolahByUserAccess(
-      utils.pick(req.query, ['nama', 'nuptk', 'sekolah_id']),
-      user,
-    )
-    const queryGuru = []
-    const querySekolahUserAccess = {}
-    if (query.tingkat) {
-      querySekolahUserAccess.tingkat = query.tingkat
-    }
-    if (Object.hasOwn(query, 'is_madrasah')) {
-      querySekolahUserAccess.is_madrasah = query.is_madrasah
-    }
+    const result = await actionGuru.findListByUserAccess(req)
 
-    if (query.nama) {
-      queryGuru.push({ nama: { contains: query.nama, mode: 'insensitive' }})
-    }
-    if (query.nuptk) {
-      queryGuru.push({ nuptk: { contains: query.nuptk }})
-    }
-    if (query.sekolah_id) {
-      queryGuru.push({ sekolah_id: query.sekolah_id })
-    }
-
-    const result = await prisma.tenagaPendidikanGuru.findMany({
-      where: querySekolahUserAccess,
-      select: {
-        ...(utils.reduceStringArrayToObjValue(['id', 'nama'], true)),
-        daftar_guru: {
-          where: queryGuru.length ? { OR: queryGuru } : {},
-          select: utils.reduceStringArrayToObjValue([
-            'id', 'nama', 'nuptk', 'jabatan', 'status'
-          ], true),
-        }
-      }
-    })
-
-    return res.status(200).json(result)
+    return res.json(result)
   },
   findGuruBySekolahId: async (req, res) => {
     const result = await prisma.tenagaPendidikanGuru.findMany({
@@ -165,10 +181,22 @@ const tenagaGuruController = {
     })
 
     return res.status(200).json(result)
+  },
+  downloadListByUserAccess: async (req, res) => {
+  const list = await actionGuru.findListByUserAccess(req)
+  const workbook = await excelUtils.writeExcel(
+    '/templates/template-guru.xlsx',
+    list,
+    constants.GURU,
+  )
+
+  await excelUtils
+    .sendWorkBookAsResponse(res, { workbook, fileName: 'list-guru.xlsx' })
   }
 }
 
 router.get('/download-template', utils.errorWrapper(tenagaGuruController.downloadTenagaGuruTemplate))
+router.get('/download-list', utils.errorWrapper(tenagaGuruController.downloadListByUserAccess))
 router.get('/', utils.errorWrapper(tenagaGuruController.findListByUserAccess))
 router.get('/sekolah/:id', utils.errorWrapper(tenagaGuruController.findGuruBySekolahId))
 router.get('/:id', utils.errorWrapper(tenagaGuruController.findOne))

@@ -185,6 +185,7 @@ const sekolahController = {
       select: {
         id: true,
         nama: true,
+        tingkat: true,
       }
     })
     return res.json(listSekolah)

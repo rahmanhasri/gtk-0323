@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/attributes-order -->
 <template>
   <div class="container">
     <div class="columns">
@@ -6,7 +5,12 @@
         <div class="field">
           <label class="label">Sekolah</label>
           <div class="control">
-            <input v-model="search" class="input" type="text" placeholder="Cari Sekolah" />
+            <input
+              v-model="search"
+              class="input"
+              type="text"
+              placeholder="Cari Sekolah"
+            />
           </div>
         </div>
       </div>
@@ -64,34 +68,57 @@
     <div class="columns">
       <div class="column is-12 field">
         <p class="control">
-          <a class="button is-primary" :class="{ 'is-loading': loading }" @click="getListSekolah"> Cari </a>
+          <a
+            class="button is-primary"
+            :class="{ 'is-loading': loading }"
+            @click.prevent="getListSekolah(true)"
+          >
+            Cari
+          </a>
         </p>
       </div>
     </div>
-    <table class="table is-fullwidth is-bordered is-striped is-hoverable">
-      <thead>
-        <tr>
-          <th>No.</th>
-          <th>Nama Sekolah</th>
-          <th>Jenis</th>
-          <th>Kecamatan</th>
-          <th>Kelurahan / Desa</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr v-for="(item, index) in paginatedListSekolah" :key="index" @click="$router.push('/sekolah/' + item.id)">
+    <progress v-if="loading" class="progress is-small is-primary" max="100" />
+    <template v-else>
+      <table class="table is-fullwidth is-bordered is-striped is-hoverable">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Nama Sekolah</th>
+            <th>Jenis</th>
+            <th>Kecamatan</th>
+            <th>Kelurahan / Desa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(item, index) in paginatedListSekolah"
+            :key="index"
+            @click="$router.push('/sekolah/' + item.id)"
+          >
             <td>{{ index + 1 + (page - 1) * limit }}</td>
             <td>{{ item.nama }}</td>
             <td>{{ item.jenis }}</td>
             <td>{{ item.kecamatan }}</td>
             <td>{{ item.kelurahan_atau_desa }}</td>
           </tr>
-      </tbody>
-    </table>
-    <nav class="pagination" role="navigation" aria-label="pagination">
-      <a class="pagination-previous" :class="{ 'is-disabled': page === 1 }" @click.prevent="turnPage(-1)">Previous</a>
-      <a class="pagination-next" :class="{ 'is-disabled': paginatedListSekolah.length < limit }" @click.prevent="turnPage(1)">Next page</a>
-    </nav>
+        </tbody>
+      </table>
+      <nav class="pagination" role="navigation" aria-label="pagination">
+        <a
+          class="pagination-previous"
+          :class="{ 'is-disabled': page === 1 }"
+          @click.prevent="turnPage(-1)"
+          >Previous</a
+        >
+        <a
+          class="pagination-next"
+          :class="{ 'is-disabled': paginatedListSekolah.length < limit }"
+          @click.prevent="turnPage(1)"
+          >Next page</a
+        >
+      </nav>
+    </template>
   </div>
 </template>
 
@@ -111,6 +138,7 @@ export default {
       listSekolah: [],
       page: 1,
       limit: 20,
+      maxLoadedPage: 1,
       //
       newFilter: false,
     }
@@ -123,38 +151,32 @@ export default {
       return this.$store.state.loading
     },
     paginatedListSekolah() {
-      return this.listSekolah.slice(this.limit * (this.page - 1), this.limit * this.page)
+      return this.listSekolah.slice(
+        this.limit * (this.page - 1),
+        this.limit * this.page
+      )
     },
     ...mapGetters(['isProvinsiUser']),
   },
-  watch: {
-    tingkatFilter(_value) {
-      this.newFilter = true
-    },
-    kecamatanFilter(_value) {
-      this.newFilter = true
-    },
-    desaFilter(_value) {
-      this.newFilter = true
-    },
-    search(_value) {
-      this.newFilter = true
-    }
-  },
-  mounted() {
+  watch: {},
+  beforeMount() {
     this.getListSekolah()
   },
   methods: {
     turnPage(value) {
       if (this.page + value > 0) {
         this.page += value
+        if (this.page > this.maxLoadedPage) {
+          this.maxLoadedPage++
+          this.getListSekolah()
+        }
       }
-      this.getListSekolah()
     },
     getListKecamatan() {
       return LIST_KECAMATAN
     },
-    getListSekolah() {
+    getListSekolah(isNewFilter = false) {
+      this.newFilter = isNewFilter
       this.$store.commit('loading')
       const params = {}
       if (this.search) {
@@ -184,12 +206,9 @@ export default {
           this.$store.commit('finishLoading')
           if (this.newFilter) {
             this.newFilter = false
+            this.maxLoadedPage = 1
             this.page = 1
             this.listSekolah = res
-            return
-          }
-          if (!res.length && this.page !== 1) {
-            this.page--
             return
           }
           this.listSekolah = this.listSekolah.concat(res)

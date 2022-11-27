@@ -58,7 +58,7 @@ model TenagaPendidikanGuru {
   nuptk           String?    @db.VarChar(32)
   alamat          String?   @db.Text
   no_ponsel       String?   @db.VarChar(24)
-  ptk             String?   @db.VarChar(255) // mata kelas
+  ptk             String?   @db.VarChar(255) // mata pelajaran
   jenis_kelamin   String    @db.VarChar(10)
   tanggal_lahir   DateTime?
   sekolah         Sekolah   @relation(fields: [sekolah_id], references: [id])
