@@ -25,12 +25,34 @@
           <a class="navbar-item" @click="$router.push('/')"> Home </a>
           <div class="navbar-item has-dropdown">
             <a class="navbar-link" @click="navSekolah = !navSekolah"> Sekolah </a>
-            <div class="navbar-dropdown" :class="{'is-hidden': navSekolah }">
+            <div class="navbar-dropdown" :class="{'is-hidden': !navSekolah }">
               <a class="navbar-item" @click="$router.push('/tambah-sekolah')">
                 Tambah Sekolah
               </a>
               <a class="navbar-item" @click="$router.push('/daftar-sekolah')">
                 Daftar Sekolah
+              </a>
+            </div>
+          </div>
+          <div class="navbar-item has-dropdown">
+            <a class="navbar-link" @click="navGuru = !navGuru"> Guru </a>
+            <div class="navbar-dropdown" :class="{'is-hidden': !navGuru }">
+              <a class="navbar-item" @click="$router.push('/guru/tambah')">
+                Tambah Guru
+              </a>
+              <a class="navbar-item" @click="$router.push('/guru/daftar')">
+                Daftar Guru
+              </a>
+            </div>
+          </div>
+          <div class="navbar-item has-dropdown">
+            <a class="navbar-link" @click="navMurid = !navMurid"> Siswa </a>
+            <div class="navbar-dropdown" :class="{'is-hidden': !navMurid }">
+              <a class="navbar-item" @click="$router.push('/siswa/tambah')">
+                Tambah Siswa
+              </a>
+              <a class="navbar-item" @click="$router.push('/siswa/daftar')">
+                Daftar Siswa
               </a>
             </div>
           </div>
@@ -49,7 +71,9 @@ export default {
   data() {
     return {
       isActiveBurger: false,
-      navSekolah: true,
+      navSekolah: false,
+      navGuru: false,
+      navMurid: false,
     }
   },
   mounted() {

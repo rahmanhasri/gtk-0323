@@ -47,7 +47,7 @@ const guruExcelColumns = [
 export const writeExcel = async (
   filePath,
   data,
-  type, // sekolah | siswa
+  type, // sekolah | siswa | guru
   isUploadResult = false,
 ) => {
   const workbook = new ExcelJS.Workbook();
@@ -56,7 +56,7 @@ export const writeExcel = async (
   const worksheet = workbook.getWorksheet('Sheet1')
 
   if (type === constants.SEKOLAH) {
-    writeExcelSekolah(data, worksheet)
+    writeExcelSekolah(data, worksheet, isUploadResult)
   }
 
   if (type === constants.SISWA) {
@@ -71,8 +71,14 @@ export const writeExcel = async (
   return workbook
 }
 
-const writeExcelSekolah = (data, worksheet) => {
-  worksheet.columns = sekolahExcelColumns
+const writeExcelSekolah = (data, worksheet, isUploadResult) => {
+  let columns = sekolahExcelColumns
+  if (isUploadResult) {
+    columns = sekolahExcelColumns.concat([{
+      header: 'Hasil Upload', key: 'hasil_upload', width: 32
+    }])
+  }
+  worksheet.columns = columns
 
   for (const [index, sekolah] of data.entries()) {
     const row = worksheet.getRow(index + 2)
@@ -87,6 +93,9 @@ const writeExcelSekolah = (data, worksheet) => {
     row.getCell('longitude').value = sekolah.koordinat.length ? sekolah.koordinat[0] : '-'
     row.getCell('latitude').value = sekolah.koordinat.length ? sekolah.koordinat[1] : '-'
     row.getCell('npsn').value = sekolah.npsn || '-'
+    if (isUploadResult) {
+      row.getCell('hasil_upload').value = sekolah.hasil_upload
+    }
   }
 
   return worksheet

@@ -1,30 +1,32 @@
 <template>
-    <table class="table is-fullwidth is-bordered is-striped is-hoverable">
-      <thead>
-        <tr>
-          <th>No.</th>
-          <th>Nama</th>
-          <th>Nomor Induk Nasional</th>
-          <th>Tingkat</th>
-          <th>Jenis Kelamin</th>
-          <th>Tahun Angkatan</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(item, index) in paginatedListSiswa"
-          :key="index"
-          @click="$router.push('/siswa/' + item.id)"
-        >
-          <td>{{ index + 1 + (page - 1) * limit }}</td>
-          <td>{{ item.nama }}</td>
-          <td>{{ item.nomor_induk_nasional }}</td>
-          <td>{{ item.tingkat }}</td>
-          <td>{{ item.jenis_kelamin }}</td>
-          <td>{{ item.tahun_angkatan }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <table class="table is-fullwidth is-bordered is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>Nama</th>
+        <th>Nomor Induk Nasional</th>
+        <th>Jenis Kelamin</th>
+        <th>Tahun Angkatan</th>
+        <th>Nama Sekolah</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="(item, index) in paginatedListSiswa"
+        :key="index"
+        @click="$router.push('/siswa/' + item.id)"
+      >
+        <td>{{ index + 1 + (page - 1) * limit }}</td>
+        <td>{{ item.nama }}</td>
+        <td>{{ item.nomor_induk_nasional }}</td>
+        <td>{{ item.jenis_kelamin }}</td>
+        <td>{{ item.tahun_angkatan }}</td>
+        <td @click="$router.push('/sekolah/' + item?.sekolah?.id)">
+          <a @click.prevent>{{ item.sekolah?.nama }}</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>
@@ -42,7 +44,7 @@ export default {
     limit: {
       type: Number,
       default: 20,
-    }
+    },
   },
   data() {
     return {}

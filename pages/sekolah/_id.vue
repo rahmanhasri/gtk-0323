@@ -348,6 +348,7 @@ export default {
       this.newFilterSiswa = isNewFilter
       this.loadingSiswa = true
       const params = {
+        sekolah_id: this.$route.params.id,
         nama: this.searchSiswa,
         nomor_induk_nasional: this.searchSiswa,
       }

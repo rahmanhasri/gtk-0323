@@ -57,7 +57,7 @@
               <select
                 v-model="form.kecamatan"
                 :disabled="viewOnly"
-                @change="$emit('changeKecamatan', $event.target.value)"
+                @change="changeKecamatan($event.target.value)"
               >
                 <option value="" disabled selected>Pilih Kecamatan</option>
                 <option
@@ -270,6 +270,7 @@ import {
   LIST_KECAMATAN,
   LIST_DESA_BY_KECAMATAN,
   DEFAULT_KOOR_SAMPANG,
+  LIST_KOOR_KECAMATAN,
 } from '@/utils/constants.mjs'
 
 export default {
@@ -323,6 +324,10 @@ export default {
   methods: {
     getListKecamatan() {
       return LIST_KECAMATAN
+    },
+    changeKecamatan(value) {
+      this.$emit('changeKecamatan', value)
+      this.koordinat = LIST_KOOR_KECAMATAN[value]
     },
     onDragEnd(marker) {
       const { lat, lng } = marker.target._latlng

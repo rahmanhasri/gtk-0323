@@ -3,13 +3,13 @@
     <div class="columns">
       <div class="column is-3 field">
         <div class="field">
-          <label class="label">Cari Guru</label>
+          <label class="label">Cari Siswa</label>
           <div class="control">
             <input
               v-model="search"
               class="input"
               type="text"
-              placeholder="Nama Guru / NUPTK Guru"
+              placeholder="Nama / Nomor Induk Nasional"
             />
           </div>
         </div>
@@ -68,63 +68,49 @@
           <a
             class="button is-primary"
             :class="{ 'is-loading': loading }"
-            @click="getListGuru(true)"
+            @click="getListSiswa(true)"
           >
             Cari
           </a>
         </p>
       </div>
     </div>
-    <template v-if="daftarGuru.length > 0">
-      <TableGuruVue
-        :paginated-list-guru="paginatedListGuru"
+    <template v-if="daftarSiswa.length > 0">
+      <TableSiswaVue
+        :paginated-list-siswa="paginatedListSiswa"
         :page="page"
         :limit="limit"
       />
       <TablePagination
-        :length="paginatedListGuru.length"
+        :length="paginatedListSiswa.length"
         :page="page"
         :limit="limit"
         @turnPage="turnPage($event)"
       />
-      <div class="columns">
-        <div class="column is-4">
-          <p class="control">
-            <a
-              class="button is-primary"
-              :class="{ 'is-loading': loading }"
-              @click="downloadListGuru"
-            >
-              Download
-            </a>
-          </p>
-        </div>
-      </div>
     </template>
-
     <p v-else class="title is-4">
-      <font-awesome-icon icon="circle-exclamation" /> Daftar Guru Kosong
+      <font-awesome-icon icon="circle-exclamation" /> Daftar Siswa Kosong
     </p>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import TableGuruVue from '@/components/TableGuru.vue'
+import TableSiswaVue from '@/components/TableSiswa.vue'
 import TablePagination from '@/components/TablePagination.vue'
 
 export default {
-  name: 'DaftarGuru',
+  name: 'DaftarSiswa',
   components: {
-    TableGuruVue,
+    TableSiswaVue,
     TablePagination,
   },
   layout: 'Dashboard',
   middleware: 'auth',
   data() {
     return {
+      daftarSiswa: [],
       daftarSekolahId: [],
-      daftarGuru: [],
       page: 1,
       limit: 40,
       maxLoadedPage: 1,
@@ -137,8 +123,8 @@ export default {
   },
   computed: {
     ...mapGetters(['loading', 'isProvinsiUser']),
-    paginatedListGuru() {
-      return this.daftarGuru.slice(
+    paginatedListSiswa() {
+      return this.daftarSiswa.slice(
         this.limit * (this.page - 1),
         this.limit * this.page
       )
@@ -153,7 +139,7 @@ export default {
     },
   },
   beforeMount() {
-    this.getListGuru()
+    this.getListSiswa()
     this.getListSekolahFilter()
   },
   methods: {
@@ -172,26 +158,22 @@ export default {
     changeSekolahId(value) {
       this.sekolahIdFilter = value
     },
-    getListGuru(isNewFilter = false) {
+    getListSiswa(isNewFilter = false) {
       this.newFilter = isNewFilter
       this.$store.commit('loading')
       const params = {}
       if (this.search) {
         params.nama = this.search
-        params.nuptk = this.search
+        params.nomor_induk_nasional = this.search
       }
-      if (this.sekolahIdFilter) {
-        params.sekolah_id = this.sekolahIdFilter
+      if (this.tingkatFilter) {
+        params.tingkat = this.tingkatFilter
       }
       this.$auth
         .requestWith('local', {
           method: 'GET',
-          url: '/api/tenaga-guru',
-          params: {
-            ...params,
-            page: this.page,
-            limit: this.limit,
-          },
+          url: `/api/siswa`,
+          params,
         })
         .then((res) => {
           this.$store.commit('finishLoading')
@@ -199,10 +181,11 @@ export default {
             this.newFilter = false
             this.maxLoadedPage = 1
             this.page = 1
-            this.daftarGuru = res
+            this.daftarSiswa = res
             return
           }
-          this.daftarGuru = this.daftarGuru.concat(res)
+
+          this.daftarSiswa = this.daftarSiswa.concat(res)
         })
         .catch((err) => {
           this.$store.commit('finishLoading')
@@ -226,9 +209,6 @@ export default {
           // TODO: Handle error
           console.log('ERR', err)
         })
-    },
-    downloadListGuru() {
-      // TODO: integrate with API
     },
   },
 }

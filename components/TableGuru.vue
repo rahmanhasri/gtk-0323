@@ -5,9 +5,9 @@
         <th>No.</th>
         <th>Nama</th>
         <th>NUPTK</th>
-        <th>Nama Sekolah</th>
         <th>Jabatan</th>
         <th>Status</th>
+        <th>Nama Sekolah</th>
       </tr>
     </thead>
     <tbody>
@@ -17,11 +17,11 @@
         </td>
         <td @click="$router.push('/guru/' + item.id)">{{ item.nama }}</td>
         <td @click="$router.push('/guru/' + item.id)">{{ item.nuptk }}</td>
+        <td @click="$router.push('/guru/' + item.id)">{{ item.jabatan }}</td>
+        <td @click="$router.push('/guru/' + item.id)">{{ item.status }}</td>
         <td @click="$router.push('/sekolah/' + item?.sekolah?.id)">
           <a @click.prevent>{{ item.sekolah?.nama }}</a>
         </td>
-        <td @click="$router.push('/guru/' + item.id)">{{ item.jabatan }}</td>
-        <td @click="$router.push('/guru/' + item.id)">{{ item.status }}</td>
       </tr>
     </tbody>
   </table>

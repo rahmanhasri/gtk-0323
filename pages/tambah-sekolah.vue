@@ -96,6 +96,7 @@ import SekolahFormsVue from '../components/SekolahForms.vue'
 import {
   LIST_KOOR_KECAMATAN,
   DEFAULT_KOOR_SAMPANG,
+  EXCEL_CONTENT_TYPE,
 } from '@/utils/constants.mjs'
 import { catchAndToastError } from '@/utils/common'
 
@@ -228,11 +229,12 @@ export default {
           url: '/api/sekolah/upload',
           headers: { 'Content-Type': 'multipart/form-data' },
           data: formData,
+          responseType: 'blob',
         })
         .then(res => {
           this.$store.commit('finishLoading')
           this.$toast.success('Upload sekolah berhasil')
-          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileURL = window.URL.createObjectURL(new Blob([res], { type: EXCEL_CONTENT_TYPE }))
           const fileLink = document.createElement('a')
 
           fileLink.href = fileURL
