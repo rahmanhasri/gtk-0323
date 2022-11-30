@@ -4,7 +4,7 @@
       <ul>
         <li :class="{ 'is-active': isTabInput }">
           <a @click.prevent="() => setTabActive('input')"
-            >Input Tenaga Pendidik Dan Guru</a
+            >Input Siswa</a
           >
         </li>
         <li :class="{ 'is-active': isTabUnggah }">
@@ -12,29 +12,28 @@
         </li>
       </ul>
     </div>
+
     <div v-if="isTabInput" class="section">
-      <GuruFormsVue
+      <SiswaFormsVue
         :nama="nama"
-        :no-ktp="noKtp"
-        :nuptk="nuptk"
+        :nomor-induk-nasional="nomorIndukNasional"
+        :nomor-induk-sekolah="nomorIndukSekolah"
+        :jenis-kelamin="jenisKelamin"
+        :kelas="kelas"
         :alamat="alamat"
         :no-ponsel="noPonsel"
-        :ptk="ptk"
-        :jenis-kelamin="jenisKelamin"
-        :jabatan="jabatan"
-        :status="status"
-        :is-submit="true"
+        :tahun-angkatan="tahunAngkatan"
         :daftar-sekolah="daftarSekolah"
-        @changeSekolahId="sekolahId = $event"
-        @changeNama="nama = $event"
-        @changeNoKtp="noKtp = $event"
-        @changeNuptk="nuptk = $event"
-        @changeAlamat="alamat = $event"
-        @changeNoPonsel="noPonsel = $event"
-        @changePtk="ptk = $event"
-        @changeJenisKelamin="jenisKelamin = $event"
-        @changeJabatan="jabatan = $event"
-        @changeStatus="status = $event"
+        @changeNama="(nama = $event)"
+        @changeNomorIndukSekolah="(nomorIndukSekolah = $event)"
+        @changeNomorIndukNasional="(nomorIndukNasional = $event)"
+        @changeJenisKelamin="(jenisKelamin = $event)"
+        @changeKelas="(kelas = $event)"
+        @changeAlamat="(alamat = $event)"
+        @changeNoPonsel="(noPonsel = $event)"
+        @changeTahunAngkatan="(tahunAngkatan = $event)"
+        @changeTanggalLahir="(tanggalLahir = $event)"
+        @changeSekolahId="(sekolahId = $event)"
         @submitInsert="submitInsert"
       />
     </div>
@@ -94,17 +93,15 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import GuruFormsVue from '@/components/GuruForms.vue'
+import SiswaFormsVue from '@/components/SiswaForms.vue'
 import { catchAndToastError } from '@/utils/common'
 import { EXCEL_CONTENT_TYPE } from '@/utils/constants.mjs'
-// const guruReqDto = [
-//   'tanggal_lahir', // TODO:
-//   'latar_belakang', // TODO:
-// ]
+
+
 export default {
-  name: 'GuruInput',
+  name: 'SiswaInput',
   components: {
-    GuruFormsVue,
+    SiswaFormsVue,
   },
   layout: 'Dashboard',
   middleware: 'auth',
@@ -114,16 +111,16 @@ export default {
       // populate
       daftarSekolah: [],
       // forms
-      nama: '',
-      noKtp: '',
-      nuptk: '',
-      alamat: '',
-      noPonsel: '',
-      ptk: '',
-      jenisKelamin: '',
+      nama: 'Rahman Hasri',
+      nomorIndukSekolah: '485721',
+      nomorIndukNasional: '485721',
+      jenisKelamin: 'LAKI-LAKI',
+      kelas: '12',
+      alamat: 'Jalan Raya Sampang',
+      noPonsel: '081322076545',
+      tahunAngkatan: new Date().getFullYear(),
       sekolahId: '',
-      jabatan: '',
-      status: '',
+      tanggalLahir: '',
       // upload
       fileName: '......',
       file: null,
@@ -156,6 +153,10 @@ export default {
       const file = e.target.files[0]
       this.fileName = file.name
     },
+    populateSiswa(siswa = {}) {
+      this.nama = siswa.nama || ''
+      this.sekolahId = siswa.sekolah_id || ''
+    },
     // REST API
     getListSekolahFilter() {
       this.$store.commit('loading')
@@ -174,55 +175,12 @@ export default {
           console.log('ERR', err)
         })
     },
-    populateGuru(guru = {}) {
-      this.nama = guru.nama || ''
-      this.noKtp = guru.no_ktp || ''
-      this.nuptk = guru.nuptk || ''
-      this.alamat = guru.alamat || ''
-      this.noPonsel = guru.no_ponsel || ''
-      this.ptk = guru.ptk || ''
-      this.jenisKelamin = guru.jenis_kelamin || ''
-      this.sekolah_id = guru.sekolah_id || ''
-      this.jabatan = guru.jabatan || ''
-      this.status = guru.status || ''
-    },
-    submitInsert() {
-      this.$store.commit('loading')
-      const data = {
-        nama: this.nama,
-        no_ktp: this.noKtp,
-        nuptk: this.nuptk,
-        alamat: this.alamat,
-        no_ponsel: this.noPonsel,
-        ptk: this.ptk,
-        jenis_kelamin: this.jenisKelamin,
-        sekolah_id: this.sekolahId,
-        jabatan: this.jabatan,
-        status: this.status,
-      }
-      this.$auth
-        .requestWith('local', {
-          method: 'POST',
-          url: '/api/tenaga-guru',
-          data,
-        })
-        .then((_res) => {
-          this.$toast.success('Input guru berhasil')
-          this.$store.commit('finishLoading')
-          this.populateGuru()
-        })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle Error
-          console.log('ERR', err)
-        })
-    },
     downloadTemplate() {
       this.$store.commit('loading')
       this.$auth
         .requestWith('local', {
           method: 'GET',
-          url: '/api/tenaga-guru/download-template',
+          url: '/api/siswa/download-template',
           responseType: 'blob',
         })
         .then((res) => {
@@ -231,7 +189,7 @@ export default {
           const fileLink = document.createElement('a')
 
           fileLink.href = fileURL
-          fileLink.setAttribute('download', 'template-guru.xlsx')
+          fileLink.setAttribute('download', 'template-siswa.xlsx')
           document.body.appendChild(fileLink)
 
           fileLink.click()
@@ -243,20 +201,21 @@ export default {
         this.$toast.error('Dibutuhkan satu file untuk upload')
         return
       }
+
       const formData = new FormData();
       formData.append('file', this.file)
       this.$store.commit('loading')
       this.$auth
         .requestWith('local', {
           method: 'POST',
-          url: '/api/tenaga-guru/upload',
+          url: '/api/siswa/upload',
           headers: { 'Content-Type': 'multipart/form-data' },
           data: formData,
           responseType: 'blob',
         })
         .then(res => {
           this.$store.commit('finishLoading')
-          this.$toast.success('Upload guru berhasil')
+          this.$toast.success('Upload siswa berhasil')
           const fileURL = window.URL.createObjectURL(new Blob([res], { type: EXCEL_CONTENT_TYPE }))
           const fileLink = document.createElement('a')
 
@@ -267,9 +226,42 @@ export default {
           fileLink.click()
         })
         .catch(catchAndToastError(this))
+    },
+    submitInsert() {
+      this.$store.commit('loading')
+      const data = {
+        nama: this.nama,
+        nomor_induk_sekolah: this.nomorIndukSekolah,
+        nomor_induk_nasional: this.nomorIndukNasional,
+        jenis_kelamin: this.jenisKelamin,
+        kelas: +this.kelas,
+        alamat: this.alamat,
+        no_ponsel: this.noPonsel,
+        tahun_angkatan: String(this.tahunAngkatan),
+        sekolah_id: this.sekolahId,
+        tanggal_lahir: new Date(this.tanggalLahir)
+      }
+
+      this.$auth
+        .requestWith('local', {
+          method: 'POST',
+          url: '/api/siswa',
+          data,
+        })
+        .then(_res => {
+          this.$toast.success('Input siswa berhasil')
+          this.populateSiswa()
+          this.$store.commit('finishLoading')
+        })
+        .catch(err => {
+          this.$store.commit('finishLoading')
+          // TODO: handle error
+          console.error(err)
+        })
     }
   },
 }
 </script>
 
-<style></style>
+<style>
+</style>

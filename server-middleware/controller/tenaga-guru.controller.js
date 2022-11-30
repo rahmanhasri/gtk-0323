@@ -49,7 +49,6 @@ const actionGuru = {
       queryGuru.push({ nuptk: { contains: query.nuptk, mode: 'insensitive' } })
     }
 
-
     const whereCondition = { sekolah: querySekolahUserAccess }
 
     if (queryGuru.length) {

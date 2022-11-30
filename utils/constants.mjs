@@ -253,3 +253,5 @@ export const LIST_KOOR_KECAMATAN = {
 export const DEFAULT_KOOR_SAMPANG = ['-7.05', '113.25']
 
 export const SERVER_ERROR_MESSAGE = 'Error ada kesalahan di server'
+
+export const EXCEL_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

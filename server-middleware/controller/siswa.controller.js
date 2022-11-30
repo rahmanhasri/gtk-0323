@@ -30,7 +30,7 @@ const actionSiswa = {
   findListByUserAccess: async (req) => {
     const { user } = req
     const query = utils.addQuerySekolahByUserAccess(
-      utils.pick(req.query, ['nama', 'nomor_induk_nasional', 'sekolah_id', 'tahun_angkatan']),
+      utils.pick(req.query, ['nama', 'tingkat', 'nomor_induk_nasional', 'sekolah_id', 'tahun_angkatan']),
       user,
     )
 

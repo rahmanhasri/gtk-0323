@@ -135,10 +135,6 @@ const sekolahController = {
         { tingkat: sekolah[6], is_madrasah: sekolah[4] }
       )
 
-      if (!allowInsert) {
-        continue
-      }
-
       const newSekolah = {
         nama: sekolah[1].trim(),
         kecamatan: sekolah[2].trim(),
@@ -149,6 +145,12 @@ const sekolahController = {
         profil: sekolah[7].trim(),
         koordinat: [sekolah[8].replace(',', '.').trim(), sekolah[9].replace(',', '.').trim()],
         npsn: sekolah[10].trim()
+      }
+
+      console.log(newSekolah)
+      if (!allowInsert) {
+        output.push({ ...newSekolah, hasil_upload: 'Akses tidak diizinkan' })
+        continue
       }
 
       const existingSekolah = await prisma.sekolah.findFirst({
@@ -163,7 +165,8 @@ const sekolahController = {
           },
           data: newSekolah,
         })
-        output.push({ id: existingSekolah.id, ...newSekolah })
+        console.log('UPDATED')
+        output.push({ id: existingSekolah.id, ...newSekolah, hasil_upload: 'Diperbaharui' })
       } else {
         const created = await prisma.sekolah.create({
           data: {
@@ -171,11 +174,21 @@ const sekolahController = {
             ...newSekolah,
           }
         })
-        output.push(created)
+        console.log('NEW')
+        output.push({ ...created, hasil_upload: 'Terbuat Baru' })
       }
     }
 
-    return res.status(201).json(output)
+    const workbook = await excelUtils.writeExcel(
+      '/templates/template-sekolah.xlsx',
+      output,
+      constants.SEKOLAH,
+      true
+    )
+    await excelUtils.sendWorkBookAsResponse(
+      res,
+      { workbook, fileName: 'list-upload-sekolah.xlsx' },
+    )
   },
   findAllSekolahByUserAccess: async (req, res) => {
     const query = utils.addQuerySekolahByUserAccess({}, req.user)

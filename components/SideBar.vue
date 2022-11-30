@@ -55,11 +55,30 @@
         </ul>
       </li>
       <li>
-        <a
+        <NuxtLink
+          to="/siswa/daftar"
           :class="{ 'is-active': isActiveMurid }"
-          to="/siswa/daftar">
+        >
           Siswa
-        </a>
+        </NuxtLink>
+        <ul :class="{ 'is-hidden': !isActiveMurid }">
+          <li>
+            <NuxtLink
+              to="/siswa/daftar"
+              :class="{ 'is-disabled': $route.name === 'siswa-daftar' }"
+            >
+              Daftar
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink
+              to="/siswa/tambah"
+              :class="{ 'is-disabled': $route.name === 'siswa-tambah' }"
+            >
+              Tambah
+            </NuxtLink>
+          </li>
+        </ul>
       </li>
     </ul>
   </aside>
@@ -83,7 +102,7 @@ export default {
       return this.$route.name.includes('guru')
     },
     isActiveMurid() {
-      return this.$route.name.includes('murid')
+      return this.$route.name.includes('siswa')
     },
   },
 }

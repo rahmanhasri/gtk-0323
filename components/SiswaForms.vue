@@ -12,7 +12,7 @@
         class="column is-8"
       >
         <div slot-scope="{ errors }" class="field">
-          <label class="label">Nama Tenaga Pendidik / Guru</label>
+          <label class="label">Nama Siswa</label>
           <div class="control">
             <input
               v-model="form.nama"
@@ -29,117 +29,40 @@
 
     <div class="columns">
       <ValidationProvider
-        rules="required|min:5"
-        name="noKtp"
+        rules="required|min:4"
+        name="noIndukSekolah"
         tag="div"
         class="column is-3"
       >
         <div slot-scope="{ errors }" class="field">
-          <label class="label">No KTP</label>
+          <label class="label">Nomor Induk Sekolah</label>
           <div class="control">
             <input
-              v-model="form.noKtp"
+              v-model="form.nomorIndukSekolah"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
-              placeholder="No KTP"
-              @change="$emit('changeNoKtp', $event.target.value)"
+              placeholder="Nomor Induk Sekolah"
+              @change="$emit('changeNomorIndukSekolah', $event.target.value)"
             />
           </div>
         </div>
       </ValidationProvider>
-    </div>
 
-    <div class="columns">
-      <ValidationProvider
-        rules="required|min:5"
-        name="nuptk"
-        tag="div"
-        class="column is-3"
-      >
-        <div slot-scope="{ errors }" class="field">
-          <label class="label">NUPTK</label>
+      <div class="column is-3">
+        <div class="field">
+          <label class="label">Nomor Induk Nasional</label>
           <div class="control">
             <input
-              v-model="form.nuptk"
-              :class="{ 'is-danger': errors[0] }"
+              v-model="form.nomorIndukNasional"
               class="input"
               type="text"
-              placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan"
-              @change="$emit('changeNuptk', $event.target.value)"
+              placeholder="Nomor Induk Nasional"
+              @change="$emit('changeNomorIndukNasional', $event.target.value)"
             />
           </div>
         </div>
-      </ValidationProvider>
-    </div>
-
-    <div class="columns">
-      <ValidationProvider
-        rules="required|min:7"
-        name="alamat"
-        tag="div"
-        class="column is-8"
-      >
-        <div slot-scope="{ errors }" class="field">
-          <label class="label">Alamat</label>
-          <div class="control">
-            <input
-              v-model="form.alamat"
-              :class="{ 'is-danger': errors[0] }"
-              class="input"
-              type="text"
-              placeholder="Alamat Guru"
-              @change="$emit('changeAlamat', $event.target.value)"
-            />
-          </div>
-        </div>
-      </ValidationProvider>
-    </div>
-
-    <div class="columns">
-      <ValidationProvider
-        rules="required|min:5"
-        name="noPonsel"
-        tag="div"
-        class="column is-3"
-      >
-        <div slot-scope="{ errors }" class="field">
-          <label class="label">No Ponsel</label>
-          <div class="control">
-            <input
-              v-model="form.noPonsel"
-              :class="{ 'is-danger': errors[0] }"
-              class="input"
-              type="text"
-              placeholder="No Ponsel"
-              @change="$emit('changeNoPonsel', $event.target.value)"
-            />
-          </div>
-        </div>
-      </ValidationProvider>
-    </div>
-
-    <div class="columns">
-      <ValidationProvider
-        rules="required|min:5"
-        name="ptk"
-        tag="div"
-        class="column is-4"
-      >
-        <div slot-scope="{ errors }" class="field">
-          <label class="label">Mata Pelajaran</label>
-          <div class="control">
-            <input
-              v-model="form.ptk"
-              :class="{ 'is-danger': errors[0] }"
-              class="input"
-              type="text"
-              placeholder="Mata Pelajaran"
-              @change="$emit('changePtk', $event.target.value)"
-            />
-          </div>
-        </div>
-      </ValidationProvider>
+      </div>
     </div>
 
     <div class="columns">
@@ -163,6 +86,25 @@
               </select>
             </div>
           </div>
+        </div>
+      </ValidationProvider>
+    </div>
+
+    <div class="columns">
+      <ValidationProvider
+        rules="required"
+        name="tanggalLahir"
+        tag="div"
+        class="column is-2"
+      >
+        <div class="control">
+          <label class="label">Tanggal Lahir</label>
+          <input
+            v-model="form.tanggalLahir"
+            class="input"
+            type="date"
+            @change="$emit('changeTanggalLahir', $event.target.value)"
+          />
         </div>
       </ValidationProvider>
     </div>
@@ -215,23 +157,41 @@
       </ValidationProvider>
     </div>
 
+
     <div class="columns">
-      <ValidationProvider
-        rules="required|min:5"
-        name="ptk"
-        tag="div"
-        class="column is-4"
-      >
-        <div slot-scope="{ errors }" class="field">
-          <label class="label">Jabatan</label>
+      <div class="column is-4 field">
+        <div class="field">
+          <label class="label">Kelas</label>
           <div class="control">
             <input
-              v-model="form.jabatan"
+              v-model="form.kelas"
+              class="input"
+              type="text"
+              placeholder="Kelas"
+              @change="$emit('changeKelas', $event.target.value)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns">
+      <ValidationProvider
+        rules="required|min:7"
+        name="alamat"
+        tag="div"
+        class="column is-8"
+      >
+        <div slot-scope="{ errors }" class="field">
+          <label class="label">Alamat</label>
+          <div class="control">
+            <input
+              v-model="form.alamat"
               :class="{ 'is-danger': errors[0] }"
               class="input"
               type="text"
-              placeholder="Jabatan"
-              @change="$emit('changeJabatan', $event.target.value)"
+              placeholder="Alamat Siswa"
+              @change="$emit('changeAlamat', $event.target.value)"
             />
           </div>
         </div>
@@ -240,28 +200,42 @@
 
     <div class="columns">
       <ValidationProvider
-        rules="required"
-        name="ptk"
+        rules="required|min:5"
+        name="noPonsel"
         tag="div"
-        class="column is-4"
+        class="column is-5"
       >
         <div slot-scope="{ errors }" class="field">
-          <label class="label">Status </label>
+          <label class="label">No Telepon</label>
           <div class="control">
-            <div class="select" :class="{ 'is-danger': errors[0] }">
-              <select
-                v-model="form.status"
-                @change="$emit('changeStatus', $event.target.value)"
-              >
-                <option value="" disabled selected>Pilih Status</option>
-                <option value="PNS">PNS</option>
-                <option value="SWASTA">Swasta</option>
-                <option value="HONORER">Honorer</option>
-              </select>
-            </div>
+            <input
+              v-model="form.noPonsel"
+              :class="{ 'is-danger': errors[0] }"
+              class="input"
+              type="text"
+              placeholder="Nomor Telepon Wali / Orang Tua / Siswa"
+              @change="$emit('changeNoPonsel', $event.target.value)"
+            />
           </div>
         </div>
       </ValidationProvider>
+    </div>
+
+    <div class="columns">
+      <div class="column is-4 field">
+        <div class="field">
+          <label class="label">Tahun Angkatan</label>
+          <div class="control">
+            <input
+              v-model="form.tahunAngkatan"
+              class="input"
+              type="number"
+              placeholder="Tahun Angkatan"
+              @change="$emit('changeTahunAngkatan', $event.target.value)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="columns">
@@ -272,7 +246,7 @@
               :class="{ 'is-loading': loading }"
               class="button is-primary"
               :disabled="invalid"
-              @click="submitInsert(reset)"
+              @click.prevent="submitInsert(reset)"
             >
               Submit
             </button>
@@ -285,7 +259,7 @@
               :disabled="invalid"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="validate() && $emit('submitEdit')"
+              @click.prevent="validate() && $emit('submitEdit')"
             >
               Save
             </button>
@@ -299,27 +273,26 @@
 <script>
 import { mapGetters } from 'vuex'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-// const guruReqDto = [
-//   'tanggal_lahir', // TODO:
-//   'latar_belakang', // TODO:
-// ]
+// 'tanggal_lahir',
+// 'tahun_ajaran', // TODO:
+// 'jenis_kelamin',
+// 'tahun_angkatan',
 export default {
-  name: 'GuruForms',
+  name: 'SiswaForms',
   components: {
     ValidationObserver,
     ValidationProvider,
   },
   props: {
     nama: { type: String, default: '' },
-    noKtp: { type: String, default: '' },
-    nuptk: { type: String, default: '' },
+    nomorIndukNasional: { type: String, default: '' },
+    nomorIndukSekolah: { type: String, default: '' },
+    kelas: { type: String, default: '' },
     alamat: { type: String, default: '' },
     noPonsel: { type: String, default: '' },
-    ptk: { type: String, default: '' },
+    tahunAngkatan: { type: Number, default: 2022 },
     jenisKelamin: { type: String, default: '' },
-    sekolahId: { type: String, default: '' },
-    jabatan: { type: String, default: '' },
-    status: { type: String, default: '' },
+    tanggalLahir: { type: String, default: '' },
     sekolahName: { type: String, default: '' },
     isSubmit: { type: Boolean, default: true },
     daftarSekolah: { type: Array, default: Array },
@@ -331,15 +304,14 @@ export default {
       searchSekolahId: '',
       form: {
         nama: this.nama,
-        noKtp: this.noKtp,
-        nuptk: this.nuptk,
+        nomorIndukNasional: this.nomorIndukNasional,
+        nomorIndukSekolah: this.nomorIndukSekolah,
+        kelas: this.kelas,
         alamat: this.alamat,
         noPonsel: this.noPonsel,
-        ptk: this.ptk,
+        tahunAngkatan: this.tahunAngkatan,
         jenisKelamin: this.jenisKelamin,
-        sekolahId: this.sekolahId,
-        jabatan: this.jabatan,
-        status: this.status,
+        tanggalLahir: this.tanggalLahir,
       },
     }
   },
@@ -358,7 +330,6 @@ export default {
       'loading',
     ]),
   },
-  mounted() {},
   methods: {
     pickSekolah(value) {
       this.$emit('changeSekolahId', value.id)
@@ -367,7 +338,7 @@ export default {
       this.isActiveSekolahDropdown = false
     },
     async submitInsert(reset) {
-      const isValid = await this.$refs.observer.validate();
+      const isValid = await this.$refs.observer.validate()
       if (isValid) {
         this.$emit('submitInsert')
         reset()
