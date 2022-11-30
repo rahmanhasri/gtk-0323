@@ -26,18 +26,8 @@ const siswaReqDto = [
   'tahun_angkatan',
 ]
 
-const siswaController = {
-  findOne: async (req, res) => {
-    const siswa = await prisma.siswa.findFirst({
-      where: { id: req.params.id },
-      include: {
-        sekolah: true,
-      }
-    })
-
-    return res.json(siswa)
-  },
-  findListByUserAccess: async (req, res) => {
+const actionSiswa = {
+  findListByUserAccess: async (req) => {
     const { user } = req
     const query = utils.addQuerySekolahByUserAccess(
       utils.pick(req.query, ['nama', 'nomor_induk_nasional', 'sekolah_id', 'tahun_angkatan']),
@@ -73,6 +63,7 @@ const siswaController = {
       whereCondition.AND = (whereCondition.AND || []).concat([{ tahun_angkatan: query.tahun_angkatan }])
     }
     const result = await prisma.siswa.findMany({
+      ...utils.prismaPagination(req.query.page, req.query.limit),
       where: whereCondition,
       select: {
         ...utils.reduceStringArrayToObjValue([
@@ -83,6 +74,24 @@ const siswaController = {
         }
       }
     })
+
+    return result
+  }
+}
+
+const siswaController = {
+  findOne: async (req, res) => {
+    const siswa = await prisma.siswa.findFirst({
+      where: { id: req.params.id },
+      include: {
+        sekolah: true,
+      }
+    })
+
+    return res.json(siswa)
+  },
+  findListByUserAccess: async (req, res) => {
+    const result = await actionSiswa.findListByUserAccess(req)
     return res.status(200).json(result)
   },
   create: async (req, res) => {
@@ -109,6 +118,20 @@ const siswaController = {
     siswaReq.tingkat = sekolah?.tingkat
     const created = await prisma.siswa.create({ data: siswaReq })
     return res.status(201).json(created)
+  },
+  update: async (req, res) => {
+    const { id, ...reqBody } = req.body
+    const siswaReq = utils.pick(reqBody, siswaReqDto)
+    if (!id) {
+      return res.status(400).send('id is required')
+    }
+
+    await prisma.siswa.update({
+      where: { id },
+      data: siswaReq,
+    })
+
+    return res.json({ message: 'ok' })
   },
   downloadSiswaTemplate: (_req, res) => {
     res.sendFile(utils.pathResolve('/templates/template-siswa.xlsx'), (err) => {
@@ -181,11 +204,24 @@ const siswaController = {
     await excelUtils
       .sendWorkBookAsResponse(res, { workbook, fileName: 'list-upload-siswa.xlsx' })
   },
+  downloadlistByUserAccess: async (req, res) => {
+    const list = await actionSiswa.findListByUserAccess(req)
+    const workbook = await excelUtils.writeExcel(
+      '/templates/template-siswa.xlsx',
+      list,
+      constants.SISWA,
+    )
+
+    await excelUtils
+      .sendWorkBookAsResponse(res, { workbook, fileName: 'list-siswa.xlsx' })
+  }
 }
 
 router.get('/download-template', utils.errorWrapper(siswaController.downloadSiswaTemplate))
+router.get('/download-list', utils.errorWrapper(siswaController.downloadlistByUserAccess))
 router.get('/', utils.errorWrapper(siswaController.findListByUserAccess))
 router.get('/:id', utils.errorWrapper(siswaController.findOne))
+router.put('/', utils.errorWrapper(siswaController.update))
 router.post('/', utils.errorWrapper(siswaController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(siswaController.upload))
 

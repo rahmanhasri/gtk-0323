@@ -95,6 +95,20 @@ const tenagaGuruController = {
     })
     return res.status(201).json(created)
   },
+  update: async (req, res) => {
+    const { id, ...reqBody } = req.body
+    const guruReq = utils.pick(reqBody, guruReqDto)
+    if (!id) {
+      return res.status(400).send('id is required')
+    }
+
+    await prisma.sekolah.update({
+      where: { id },
+      data: guruReq,
+    })
+
+    return res.json({ message: 'ok' })
+  },
   downloadTenagaGuruTemplate: (_req, res) => {
     res.sendFile(utils.pathResolve('/templates/template-guru.xlsx'), (err) => {
       if (err) {
@@ -200,6 +214,7 @@ router.get('/download-list', utils.errorWrapper(tenagaGuruController.downloadLis
 router.get('/', utils.errorWrapper(tenagaGuruController.findListByUserAccess))
 router.get('/sekolah/:id', utils.errorWrapper(tenagaGuruController.findGuruBySekolahId))
 router.get('/:id', utils.errorWrapper(tenagaGuruController.findOne))
+router.put('/', utils.errorWrapper(tenagaGuruController.update))
 router.post('/', utils.errorWrapper(tenagaGuruController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(tenagaGuruController.upload))
 
