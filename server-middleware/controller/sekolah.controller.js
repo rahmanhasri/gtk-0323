@@ -64,9 +64,10 @@ const sekolahController = {
       return res.status(400).send('id is required')
     }
     await prisma.sekolah.update({
-      where: { id },
       data: sekolahReq,
+      where: { id },
     })
+    return res.json({ message: 'ok' })
   },
   findListByUserAccess: async (req, res) => {
     const { user } = req;

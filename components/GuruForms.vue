@@ -1,5 +1,9 @@
 <template>
-  <ValidationObserver ref="observer" v-slot="{ validate, invalid, reset }" tag="form">
+  <ValidationObserver
+    ref="observer"
+    v-slot="{ validate, invalid, reset }"
+    tag="form"
+  >
     <div class="columns">
       <ValidationProvider
         rules="required|min:5"
@@ -168,9 +172,13 @@
         rules="required"
         name="sekolah_id"
         tag="div"
-        class="column is-5"
+        class="column is-4"
       >
-        <div slot-scope="{ errors }" class="dropdown" :class="{ 'is-active': isActiveSekolahDropdown }">
+        <div
+          slot-scope="{ errors }"
+          class="dropdown"
+          :class="{ 'is-active': isActiveSekolahDropdown }"
+        >
           <div class="dropdown-trigger">
             <div class="field">
               <label class="label">Sekolah</label>
@@ -264,9 +272,22 @@
               :class="{ 'is-loading': loading }"
               class="button is-primary"
               :disabled="invalid"
-              @click="validate().then(() => submitInsert(reset))"
+              @click="submitInsert(reset)"
             >
               Submit
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="field">
+          <div class="control">
+            <button
+              :disabled="invalid"
+              :class="{ 'is-loading': loading }"
+              class="button is-primary"
+              @click="validate() && $emit('submitEdit')"
+            >
+              Save
             </button>
           </div>
         </div>
@@ -307,6 +328,7 @@ export default {
     return {
       isActiveSekolahDropdown: false,
       searchSekolah: this.sekolahName || '',
+      searchSekolahId: '',
       form: {
         nama: this.nama,
         noKtp: this.noKtp,
@@ -324,11 +346,8 @@ export default {
   computed: {
     limitedDaftarSekolah() {
       return this.daftarSekolah
-        .filter(
-          sekolah => sekolah
-            .nama
-            .toLowerCase()
-            .includes(this.searchSekolah.toLowerCase())
+        .filter((sekolah) =>
+          sekolah.nama.toLowerCase().includes(this.searchSekolah.toLowerCase())
         )
         .slice(0, 8)
     },
@@ -339,18 +358,22 @@ export default {
       'loading',
     ]),
   },
-  mounted() { },
+  mounted() {},
   methods: {
     pickSekolah(value) {
       // this.sekolahId = value
       this.$emit('changeSekolahId', value.id)
       this.searchSekolah = value.nama
+      this.searchSekolahId = value.id
       this.isActiveSekolahDropdown = false
     },
-    submitInsert(reset) {
-      this.$emit('submitInsert')
-      reset()
-    }
+    async submitInsert(reset) {
+      const isValid = await this.$refs.observer.validate();
+      if (isValid) {
+        this.$emit('submitInsert')
+        reset()
+      }
+    },
   },
 }
 </script>

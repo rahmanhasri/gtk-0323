@@ -283,8 +283,7 @@ export default {
       this.tingkat = sekolah.tingkat || ''
       this.profil = sekolah.profil || ''
       this.isNegeri = sekolah.negeri || false
-      // this.daftarGuru = sekolah.daftar_guru || []
-      // this.daftarSiswa = sekolah.daftar_siswa || []
+      this.koordinat = sekolah.koordinat || []
     },
     getDetailSekolah() {
       this.loadingSekolah = true

@@ -238,7 +238,7 @@
               :disabled="invalid"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="validate().then(() => submitInsert(reset))"
+              @click="submitInsert(reset)"
             >
               Submit
             </button>
@@ -248,9 +248,10 @@
           <div class="control">
               <!-- :disabled="invalid" -->
             <button
+              :disabled="invalid"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="validate().then(() => $emit('submitEdit'))"
+              @click="validate() && submitEdit()"
             >
               Save
             </button>
@@ -325,22 +326,25 @@ export default {
     },
     onDragEnd(marker) {
       const { lat, lng } = marker.target._latlng
-      this.koordinat = [lat, lng]
-      this.$emit('changeKoordinat', [lat, lng])
+      this.koordinat = [String(lat), String(lng)]
+      this.$emit('changeKoordinat', [String(lat), String(lng)])
     },
-    submitInsert(reset) {
-      this.$emit('submitInsert')
-      this.form = {
-        nama: '',
-        npsn: '',
-        kecamatan: '',
-        desa: '',
-        isMadrasah: false,
-        tingkat: this.tingkat,
-        isNegeri: false,
+    async submitInsert(reset) {
+      const isValid = await this.$refs.observer.validate();
+      if (isValid) {
+        this.$emit('submitInsert')
+        this.form = {
+          nama: '',
+          npsn: '',
+          kecamatan: '',
+          desa: '',
+          isMadrasah: false,
+          tingkat: this.tingkat,
+          isNegeri: false,
+        }
+        reset()
       }
-      reset()
-    }
+    },
   },
 }
 </script>

@@ -14,6 +14,7 @@
         :jabatan="jabatan"
         :status="status"
         :sekolah-name="sekolah.nama"
+        :sekolah-id="sekolah.id"
         :is-submit="false"
         :daftar-sekolah="daftarSekolah"
         @changeSekolahId="sekolahId = $event"
@@ -36,6 +37,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import GuruFormsVue from '@/components/GuruForms.vue';
+import { catchAndToastError } from '@/utils/common'
 
 export default {
   name: 'GuruDetail',
@@ -73,7 +75,6 @@ export default {
   },
   methods: {
     populateGuru(guru = {}) {
-      console.log(guru)
       this.nama = guru.nama || ''
       this.noKtp = guru.no_ktp || ''
       this.nuptk = guru.nuptk || ''
@@ -119,7 +120,30 @@ export default {
         })
     },
     submitEdit() {
-
+      this.$store.commit('loading')
+      this.$auth
+        .requestWith('local', {
+          method: 'PUT',
+          url: '/api/tenaga-guru',
+          data: {
+            id: this.$route.params.id,
+            nama: this.nama,
+            no_ktp: this.noKtp,
+            nuptk: this.nuptk,
+            alamat: this.alamat,
+            no_ponsel: this.noPonsel,
+            ptk: this.ptk,
+            jenis_kelamin: this.jenisKelamin,
+            sekolah_id: this.sekolahId,
+            jabatan: this.jabatan,
+            status: this.status,
+          },
+        })
+        .then((_res) => {
+          this.$store.commit('finishLoading')
+          this.$toast.success('Edit sekolah berhasil')
+        })
+        .catch(catchAndToastError(this))
     },
   }
 }
