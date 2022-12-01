@@ -87,6 +87,19 @@
         :limit="limit"
         @turnPage="turnPage($event)"
       />
+      <div class="columns">
+        <div class="column is-4">
+          <p class="control">
+            <button
+              class="button is-primary"
+              :class="{ 'is-loading': loading }"
+              @click.prevent="downloadListSiswa"
+            >
+              Download
+            </button>
+          </p>
+        </div>
+      </div>
     </template>
     <p v-else class="title is-4">
       <font-awesome-icon icon="circle-exclamation" /> Daftar Siswa Kosong
@@ -210,6 +223,38 @@ export default {
           console.log('ERR', err)
         })
     },
+    downloadListSiswa() {
+      this.$store.commit('loading')
+      const params = {}
+      if (this.search) {
+        params.nama = this.search
+        params.nomor_induk_nasional = this.search
+      }
+      if (this.tingkatFilter) {
+        params.tingkat = this.tingkatFilter
+      }
+      this.$auth
+        .requestWith('local', {
+          method: 'GET',
+          url: '/api/siswa/download-list',
+          params,
+          responseType: 'blob',
+        })
+        .then(res => {
+          this.$store.commit('finishLoading')
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', 'daftar-siswa.xlsx')
+          document.body.appendChild(fileLink)
+
+          fileLink.click()
+        })
+        .catch(_err => {
+          this.$toast.error('Error pada server, agal mengunduh daftar sekolah')
+        })
+    }
   },
 }
 </script>

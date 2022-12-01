@@ -272,7 +272,7 @@
               :class="{ 'is-loading': loading }"
               class="button is-primary"
               :disabled="invalid"
-              @click="submitInsert(reset)"
+              @click.prevent="submitInsert(reset)"
             >
               Submit
             </button>
@@ -285,7 +285,7 @@
               :disabled="invalid"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="validate() && $emit('submitEdit')"
+              @click.prevent="validate() && $emit('submitEdit')"
             >
               Save
             </button>

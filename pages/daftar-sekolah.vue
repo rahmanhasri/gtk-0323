@@ -118,6 +118,19 @@
           >Next page</a
         >
       </nav>
+      <div class="columns">
+        <div class="column is-4">
+          <p class="control">
+            <button
+              class="button is-primary"
+              :class="{ 'is-loading': loading }"
+              @click.prevent="downloadListSekolah"
+            >
+              Download
+            </button>
+          </p>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -219,6 +232,43 @@ export default {
           console.log('ERR', err)
         })
     },
+    downloadListSekolah() {
+      this.$store.commit('loading')
+      const params = {}
+      if (this.search) {
+        params.nama = this.search
+      }
+      if (this.tingkatFilter) {
+        params.tingkat = this.tingkatFilter
+      }
+      if (this.kecamatanFilter) {
+        params.kecamatan = this.kecamatanFilter
+      }
+      if (this.desaFilter) {
+        params.kelurahan_atau_desa = this.desaFilter
+      }
+      this.$auth
+        .requestWith('local', {
+          method: 'GET',
+          url: '/api/sekolah/download-list',
+          params,
+          responseType: 'blob',
+        })
+        .then(res => {
+          this.$store.commit('finishLoading')
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', 'daftar-sekolah.xlsx')
+          document.body.appendChild(fileLink)
+
+          fileLink.click()
+        })
+        .catch(_err => {
+          this.$toast.error('Error pada server, agal mengunduh daftar sekolah')
+        })
+    }
   },
 }
 </script>

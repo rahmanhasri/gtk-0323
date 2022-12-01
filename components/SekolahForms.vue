@@ -238,7 +238,7 @@
               :disabled="invalid"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="submitInsert(reset)"
+              @click.prevent="submitInsert(reset)"
             >
               Submit
             </button>
@@ -246,12 +246,11 @@
         </div>
         <div v-else class="field">
           <div class="control">
-              <!-- :disabled="invalid" -->
             <button
               :disabled="invalid"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="validate() && submitEdit()"
+              @click.prevent="validate() && submitEdit()"
             >
               Save
             </button>

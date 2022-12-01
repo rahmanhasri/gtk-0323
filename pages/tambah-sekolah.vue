@@ -6,7 +6,7 @@
           <a @click.prevent="() => setTabActive('input')">Input Sekolah</a>
         </li>
         <li :class="{ 'is-active': isTabUnggah }">
-          <a @click.prevent="() => setTabActive('unggah')">Unggah Sekolah</a>
+          <a @click.prevent="() => setTabActive('upload')">Upload Sekolah</a>
         </li>
       </ul>
     </div>
@@ -130,7 +130,7 @@ export default {
       return this.tabActive === 'input'
     },
     isTabUnggah() {
-      return this.tabActive === 'unggah'
+      return this.tabActive === 'upload'
     },
     ...mapGetters([
       'isProvinsiUser',

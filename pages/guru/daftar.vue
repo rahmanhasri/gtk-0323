@@ -90,13 +90,13 @@
       <div class="columns">
         <div class="column is-4">
           <p class="control">
-            <a
+            <button
               class="button is-primary"
               :class="{ 'is-loading': loading }"
-              @click="downloadListGuru"
+              @click.prevent="downloadListGuru"
             >
               Download
-            </a>
+            </button>
           </p>
         </div>
       </div>
@@ -228,7 +228,36 @@ export default {
         })
     },
     downloadListGuru() {
-      // TODO: integrate with API
+      this.$store.commit('loading')
+      const params = {}
+      if (this.search) {
+        params.nama = this.search
+        params.nuptk = this.search
+      }
+      if (this.sekolahIdFilter) {
+        params.sekolah_id = this.sekolahIdFilter
+      }
+      this.$auth
+        .requestWith('local', {
+          method: 'GET',
+          url: '/api/guru/download-list',
+          params,
+          responseType: 'blob',
+        })
+        .then(res => {
+          this.$store.commit('finishLoading')
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', 'daftar-guru.xlsx')
+          document.body.appendChild(fileLink)
+
+          fileLink.click()
+        })
+        .catch(_err => {
+          this.$toast.error('Error pada server, agal mengunduh daftar sekolah')
+        })
     },
   },
 }

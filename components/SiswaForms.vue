@@ -273,10 +273,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-// 'tanggal_lahir',
 // 'tahun_ajaran', // TODO:
-// 'jenis_kelamin',
-// 'tahun_angkatan',
 export default {
   name: 'SiswaForms',
   components: {

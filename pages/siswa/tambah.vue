@@ -8,7 +8,7 @@
           >
         </li>
         <li :class="{ 'is-active': isTabUnggah }">
-          <a @click.prevent="() => setTabActive('unggah')">Unggah</a>
+          <a @click.prevent="() => setTabActive('upload')">Upload</a>
         </li>
       </ul>
     </div>
@@ -23,6 +23,7 @@
         :alamat="alamat"
         :no-ponsel="noPonsel"
         :tahun-angkatan="tahunAngkatan"
+        :tanggal-lahir="tanggalLahir"
         :daftar-sekolah="daftarSekolah"
         @changeNama="(nama = $event)"
         @changeNomorIndukSekolah="(nomorIndukSekolah = $event)"
@@ -111,13 +112,13 @@ export default {
       // populate
       daftarSekolah: [],
       // forms
-      nama: 'Rahman Hasri',
-      nomorIndukSekolah: '485721',
-      nomorIndukNasional: '485721',
+      nama: '',
+      nomorIndukSekolah: '',
+      nomorIndukNasional: '',
       jenisKelamin: 'LAKI-LAKI',
-      kelas: '12',
-      alamat: 'Jalan Raya Sampang',
-      noPonsel: '081322076545',
+      kelas: '',
+      alamat: '',
+      noPonsel: '',
       tahunAngkatan: new Date().getFullYear(),
       sekolahId: '',
       tanggalLahir: '',
@@ -137,7 +138,7 @@ export default {
       return this.tabActive === 'input'
     },
     isTabUnggah() {
-      return this.tabActive === 'unggah'
+      return this.tabActive === 'upload'
     },
   },
   beforeMount() {
@@ -156,6 +157,14 @@ export default {
     populateSiswa(siswa = {}) {
       this.nama = siswa.nama || ''
       this.sekolahId = siswa.sekolah_id || ''
+      this.nomorIndukNasional = siswa.nomor_induk_nasional || ''
+      this.nomorIndukSekolah = siswa.nomor_induk_sekolah || ''
+      this.jenisKelamin = siswa.jenis_kelamin || ''
+      this.kelas = siswa.kelas || ''
+      this.alamat = siswa.alamat || ''
+      this.noPonsel = siswa.no_ponsel || ''
+      this.tahunAngkatan = siswa.tahun_angkatan || new Date().getFullYear()
+      this.tanggalLahir = siswa.tanggal_lahir || ''
     },
     // REST API
     getListSekolahFilter() {
