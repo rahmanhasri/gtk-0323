@@ -255,3 +255,13 @@ export const DEFAULT_KOOR_SAMPANG = ['-7.05', '113.25']
 export const SERVER_ERROR_MESSAGE = 'Error ada kesalahan di server'
 
 export const EXCEL_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+export const GURU = 'guru'
+
+export const TENAGA_PENDIDIK = 'tenaga-pendidik'
+
+export const RUANGAN = 'ruangan'
+
+export const SWASTA = 'swasta'
+
+export const NEGERI = 'negeri'

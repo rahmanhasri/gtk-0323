@@ -24,6 +24,7 @@ const siswaReqDto = [
   'tahun_ajaran',
   'jenis_kelamin',
   'tahun_angkatan',
+  'is_active',
 ]
 
 const actionSiswa = {
@@ -49,30 +50,35 @@ const actionSiswa = {
       querySekolahUserAccess.is_madrasah = query.is_madrasah
     }
 
-    const whereCondition = { sekolah: querySekolahUserAccess }
+    const whereCondition = { sekolah: querySekolahUserAccess, AND: [{ deleted: false }] }
 
     if (querySiswa.length) {
       whereCondition.OR = querySiswa
     }
 
     if (query.sekolah_id) {
-      whereCondition.AND = [{ sekolah_id: query.sekolah_id }]
+      whereCondition.AND = whereCondition.AND.concat([{ sekolah_id: query.sekolah_id }])
     }
 
     if (query.tahun_angkatan) {
-      whereCondition.AND = (whereCondition.AND || []).concat([{ tahun_angkatan: query.tahun_angkatan }])
+      whereCondition.AND = whereCondition.AND.concat([{ tahun_angkatan: query.tahun_angkatan }])
     }
     const result = await prisma.siswa.findMany({
       ...utils.prismaPagination(req.query.page, req.query.limit),
       where: whereCondition,
       select: {
-        ...utils.reduceStringArrayToObjValue([
-          'id', 'nama', 'nomor_induk_nasional', 'tingkat', 'jenis_kelamin', 'tahun_angkatan'
-        ], true),
+        ...utils.reduceStringArrayToObjValue(
+          [
+            'id', 'nama', 'nomor_induk_nasional', 'nomor_induk_sekolah', 'tingkat',
+            'jenis_kelamin', 'tahun_angkatan', 'is_active', 'alamat', 'no_ponsel',
+          ],
+          true,
+        ),
         sekolah: {
-          select: utils.reduceStringArrayToObjValue(['id', 'nama'], true),
+          select: utils.reduceStringArrayToObjValue(['id', 'nama', 'npsn'], true),
         }
-      }
+      },
+      orderBy: [{ created_at: 'desc' }],
     })
 
     return result
@@ -162,7 +168,6 @@ const siswaController = {
       })
 
       const newSiswa = {
-        id: uuid.v4(),
         nama: siswa[1].trim(),
         sekolah_id: sekolah ? sekolah.id : '',
         nomor_induk_nasional: String(siswa[3]),
@@ -175,12 +180,34 @@ const siswaController = {
         tingkat: sekolah?.tingkat,
       }
 
-      // TODO: allowInsert
       // TODO: Upsert by nomor_induk_nasional
       if (!sekolah) {
         uploadMessage = 'GAGAL UPLOAD: NPSN Sekolah tidak terdaftar'
+      } else if(!utils.validateUploadSekolah(
+        req.user,
+        { tingkat: sekolah?.tingkat, is_madrasah: sekolah?.is_madrasah },
+      )) {
+        uploadMessage = 'Akses tidak diizinkan'
       } else {
-        createMany.push(newSiswa)
+        let existingSiswa = null
+        if (newSiswa.nomor_induk_nasional) {
+          existingSiswa = await prisma.siswa.findFirst({
+            where: {
+              nomor_induk_nasional: newSiswa.nomor_induk_nasional,
+            }
+          })
+        }
+
+        if (existingSiswa) {
+          uploadMessage = 'Data Siswa dengan nomor induk nasional sama diperbaharui'
+          await prisma.siswa.updateMany({
+            where: { nomor_induk_nasional: newSiswa.nomor_induk_nasional },
+            data: newSiswa
+          })
+        } else {
+          newSiswa.id = uuid.v4()
+          createMany.push(newSiswa)
+        }
       }
 
       output.push({
@@ -214,6 +241,13 @@ const siswaController = {
 
     await excelUtils
       .sendWorkBookAsResponse(res, { workbook, fileName: 'list-siswa.xlsx' })
+  },
+  delete: async (req, res) => {
+    await prisma.siswa.delete({
+      where: { id: req.params.id },
+    })
+
+    return res.json({ message: 'ok' })
   }
 }
 
@@ -224,6 +258,7 @@ router.get('/:id', utils.errorWrapper(siswaController.findOne))
 router.put('/', utils.errorWrapper(siswaController.update))
 router.post('/', utils.errorWrapper(siswaController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(siswaController.upload))
+router.delete('/:id', utils.errorWrapper(siswaController.delete))
 
 export default {
   path: '/siswa',

@@ -13,10 +13,15 @@
         :jenis-kelamin="jenisKelamin"
         :jabatan="jabatan"
         :status="status"
+        :kategori="kategori"
+        :jenjang="jenjang"
+        :is-active-guru="isActive"
         :sekolah-name="sekolah.nama"
         :sekolah-id="sekolah.id"
         :is-submit="false"
         :daftar-sekolah="daftarSekolah"
+        :view-only="!editable"
+        :editable="editable"
         @changeSekolahId="sekolahId = $event"
         @changeNama="nama = $event"
         @changeNoKtp="noKtp = $event"
@@ -27,16 +32,20 @@
         @changeJenisKelamin="jenisKelamin = $event"
         @changeJabatan="jabatan = $event"
         @changeStatus="status = $event"
+        @changeKategori="kategori = $event"
+        @changeJenjang="(jenjang = $event)"
+        @changeIsActive="(isActive = $event)"
         @submitEdit="submitEdit"
+        @submitDelete="submitDelete"
+        @changeEditable="editable = !editable"
       />
     </div>
-
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import GuruFormsVue from '@/components/GuruForms.vue';
+import GuruFormsVue from '@/components/GuruForms.vue'
 import { catchAndToastError } from '@/utils/common'
 
 export default {
@@ -48,6 +57,7 @@ export default {
   middleware: 'auth',
   data() {
     return {
+      editable: false,
       // forms
       nama: '',
       noKtp: '',
@@ -59,6 +69,9 @@ export default {
       sekolahId: '',
       jabatan: '',
       status: '',
+      kategori: '',
+      jenjang: '',
+      isActive: true,
       sekolah: {
         nama: '',
       },
@@ -85,6 +98,9 @@ export default {
       this.sekolahId = guru.sekolah_id || ''
       this.jabatan = guru.jabatan || ''
       this.status = guru.status || ''
+      this.kategori = guru.kategori || ''
+      this.jenjang = guru.jenjang || ''
+      this.isActive = guru.is_active || true
       this.sekolah = guru.sekolah
     },
     // REST API
@@ -97,10 +113,7 @@ export default {
         .then((res) => {
           this.daftarSekolah = res
         })
-        .catch((err) => {
-          // TODO: Handle error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
     getDetailGuru() {
       this.$store.commit('loading')
@@ -113,11 +126,7 @@ export default {
           this.populateGuru(res)
           this.$store.commit('finishLoading')
         })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
     submitEdit() {
       this.$store.commit('loading')
@@ -137,18 +146,53 @@ export default {
             sekolah_id: this.sekolahId,
             jabatan: this.jabatan,
             status: this.status,
+            kategori: this.kategori,
+            jenjang: this.jenjang,
+            is_active: this.isActive,
           },
         })
         .then((_res) => {
           this.$store.commit('finishLoading')
-          this.$toast.success('Edit sekolah berhasil')
+          this.$toast.success('Edit guru / tenaga pendidik berhasil')
         })
         .catch(catchAndToastError(this))
     },
-  }
+    submitDelete() {
+      this.$toast.error('Anda yakin ?', {
+        action: [
+          {
+            text: 'Tidak',
+            onClick: (_e, toastObject) => {
+              toastObject.goAway(0)
+            },
+          },
+          {
+            text: 'Ya',
+            onClick: (_e, toastObject) => {
+              this.$store.commit('loading')
+              this.$auth
+                .requestWith('local', {
+                  method: 'DELETE',
+                  url: '/api/tenaga-guru/' + this.$route.params.id,
+                })
+                .then((_res) => {
+                  this.$store.commit('finishLoading')
+                  this.$toast.success('Hapus guru / tenaga pendidik berhasil')
+                  setTimeout(() => {
+                    this.$router.replace('/guru/daftar')
+                  }, 1000)
+                })
+                .catch(catchAndToastError(this))
+              toastObject.goAway(0)
+            },
+          },
+        ],
+      })
+    },
+  },
 }
 </script>
 
-<style>
+<style></style>
 
 </style>

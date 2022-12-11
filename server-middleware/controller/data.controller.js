@@ -10,25 +10,48 @@ const mapGroupByCount = (fieldName) => (result) => {
     .map(item => ({ count: item._count[fieldName], [fieldName]: item[fieldName] }))
 }
 const dataController = {
-  // jumlah sekolah by tingkat (query kecamatan and tingkat?),
-  // TODO: Jumlah Murid
-  // TODO: Jumlah guru
   getPresentaseByUserAccess: async (req, res) => {
-    const resultTingkat = await prisma.sekolah.groupBy({
+    const resultActiveSiswa = await prisma.siswa.count({
+      where: {
+        is_active: true,
+        deleted: false,
+      },
+    })
+    const resultActiveGuruDanTenaga = await prisma.tenagaPendidikanGuru.groupBy({
+      by: ['kategori'],
+      where: {
+        is_active: true,
+        deleted: false,
+      },
+      _count: {
+        kategori: true
+      }
+    }).then(mapGroupByCount('kategori'))
+    const resultTingkatSekolah = await prisma.sekolah.groupBy({
       by: ['tingkat'],
       _count: {
         tingkat: true
       }
     }).then(mapGroupByCount('tingkat'))
-    const resultKecamatan = await prisma.sekolah.groupBy({
+
+    const resultKecamatanSekolah = await prisma.sekolah.groupBy({
       by: ['kecamatan'],
       _count: {
         kecamatan: true
       }
     }).then(mapGroupByCount('kecamatan'))
+
+    const resultJenisSekolah = await prisma.sekolah.groupBy({
+      by: ['jenis'],
+      _count: { jenis: true }
+    }).then(mapGroupByCount('jenis'))
+
     return res.status(200).json({
-      tingkat: resultTingkat,
-      kecamatan: resultKecamatan,
+      countTingkat: resultTingkatSekolah,
+      countJenis: resultJenisSekolah,
+      countKecamatan: resultKecamatanSekolah,
+      totalSiswa: resultActiveSiswa,
+      totalGuru: resultActiveGuruDanTenaga,
     })
   },
 }

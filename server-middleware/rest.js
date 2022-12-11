@@ -12,6 +12,7 @@ import sekolahRoutes from './controller/sekolah.controller.js'
 import dataRoutes from './controller/data.controller.js'
 import siswaRoutes from './controller/siswa.controller.js'
 import tenagaDanGuruRoutes from './controller/tenaga-guru.controller.js'
+import saranaPrasaranaRoutes from './controller/sarana-prasarana.controller.js'
 
 dotenv.config()
 const app = express()
@@ -28,5 +29,6 @@ app.use(sekolahRoutes.path, utils.authMiddleware, sekolahRoutes.handler)
 app.use(dataRoutes.path, utils.authMiddleware, dataRoutes.handler)
 app.use(siswaRoutes.path, utils.authMiddleware, siswaRoutes.handler)
 app.use(tenagaDanGuruRoutes.path, utils.authMiddleware, tenagaDanGuruRoutes.handler)
+app.use(saranaPrasaranaRoutes.path, utils.authMiddleware, saranaPrasaranaRoutes.handler)
 
 export default app

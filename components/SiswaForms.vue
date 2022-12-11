@@ -25,6 +25,21 @@
           </div>
         </div>
       </ValidationProvider>
+
+      <div v-if="!isSubmit && !isReadonlyUser" class="column is-2 is-offset-1">
+        <div class="field">
+          <label class="label"> Edit </label>
+          <input
+            id="switchNormal3"
+            type="checkbox"
+            name="switchNormal3"
+            class="switch"
+            :checked="editable ? '1' : ''"
+            @change="$emit('changeEditable')"
+          />
+          <label for="switchNormal3"></label>
+        </div>
+      </div>
     </div>
 
     <div class="columns">
@@ -43,6 +58,7 @@
               class="input"
               type="text"
               placeholder="Nomor Induk Sekolah"
+              :readonly="viewOnly"
               @change="$emit('changeNomorIndukSekolah', $event.target.value)"
             />
           </div>
@@ -58,6 +74,7 @@
               class="input"
               type="text"
               placeholder="Nomor Induk Nasional"
+              :readonly="viewOnly"
               @change="$emit('changeNomorIndukNasional', $event.target.value)"
             />
           </div>
@@ -78,6 +95,7 @@
             <div class="select" :class="{ 'is-danger': errors[0] }">
               <select
                 v-model="form.jenisKelamin"
+                :disabled="viewOnly"
                 @change="$emit('changeJenisKelamin', $event.target.value)"
               >
                 <option value="" disabled selected>Pilih Jenis</option>
@@ -103,6 +121,7 @@
             v-model="form.tanggalLahir"
             class="input"
             type="date"
+            :readonly="viewOnly"
             @change="$emit('changeTanggalLahir', $event.target.value)"
           />
         </div>
@@ -131,7 +150,9 @@
                   type="search"
                   placeholder="Ketik nama sekolah"
                   :class="{ 'is-danger': errors[0] }"
+                  :readonly="viewOnly"
                   @focusin="isActiveSekolahDropdown = true"
+                  @focusout="deactivateDropdown"
                 />
                 <span class="icon is-small is-right"
                   ><font-awesome-icon
@@ -157,7 +178,6 @@
       </ValidationProvider>
     </div>
 
-
     <div class="columns">
       <div class="column is-4 field">
         <div class="field">
@@ -168,6 +188,7 @@
               class="input"
               type="text"
               placeholder="Kelas"
+              :readonly="viewOnly"
               @change="$emit('changeKelas', $event.target.value)"
             />
           </div>
@@ -191,6 +212,7 @@
               class="input"
               type="text"
               placeholder="Alamat Siswa"
+              :readonly="viewOnly"
               @change="$emit('changeAlamat', $event.target.value)"
             />
           </div>
@@ -214,6 +236,7 @@
               class="input"
               type="text"
               placeholder="Nomor Telepon Wali / Orang Tua / Siswa"
+              :readonly="viewOnly"
               @change="$emit('changeNoPonsel', $event.target.value)"
             />
           </div>
@@ -231,6 +254,7 @@
               class="input"
               type="number"
               placeholder="Tahun Angkatan"
+              :readonly="viewOnly"
               @change="$emit('changeTahunAngkatan', $event.target.value)"
             />
           </div>
@@ -238,14 +262,32 @@
       </div>
     </div>
 
-    <div class="columns">
+    <div v-if="!isSubmit" class="columns">
       <div class="column">
+        <div class="field">
+          <label class="label">Status</label>
+          <input
+            id="switchNormal"
+            type="checkbox"
+            name="switchNormal"
+            class="switch"
+            :checked="isActive ? '1' : ''"
+            :disabled="viewOnly"
+            @change="$emit('changeIsActive', !isActive)"
+          />
+          <label for="switchNormal">Aktif</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns">
+      <div class="column is-2">
         <div v-if="isSubmit" class="field">
           <div class="control">
             <button
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              :disabled="invalid"
+              :disabled="invalid || isReadonlyUser"
               @click.prevent="submitInsert(reset)"
             >
               Submit
@@ -256,7 +298,7 @@
         <div v-else class="field">
           <div class="control">
             <button
-              :disabled="invalid"
+              :disabled="(invalid || isReadonlyUser || viewOnly)"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
               @click.prevent="validate() && $emit('submitEdit')"
@@ -266,6 +308,18 @@
           </div>
         </div>
       </div>
+      <div v-if="!isSubmit && !viewOnly" class="column is-2">
+        <div class="control">
+          <button
+            :disabled="invalid || isReadonlyUser"
+            :class="{ 'is-loading': loading }"
+            class="button is-danger"
+            @click.prevent="$emit('submitDelete')"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
   </ValidationObserver>
 </template>
@@ -273,10 +327,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-// 'tanggal_lahir',
-// 'tahun_ajaran', // TODO:
-// 'jenis_kelamin',
-// 'tahun_angkatan',
+
 export default {
   name: 'SiswaForms',
   components: {
@@ -293,8 +344,11 @@ export default {
     tahunAngkatan: { type: Number, default: 2022 },
     jenisKelamin: { type: String, default: '' },
     tanggalLahir: { type: String, default: '' },
+    isActive: { type: Boolean, default: true },
     sekolahName: { type: String, default: '' },
     isSubmit: { type: Boolean, default: true },
+    editable: { type: Boolean, default: false },
+    viewOnly: { type: Boolean, default: false },
     daftarSekolah: { type: Array, default: Array },
   },
   data() {
@@ -327,8 +381,14 @@ export default {
       'isProvinsiUser',
       'isDinasPendidikanUser',
       'isKemenagUser',
+      'isReadonlyUser',
       'loading',
     ]),
+  },
+  watch: {
+    sekolahName(value) {
+      this.searchSekolah = value
+    },
   },
   methods: {
     pickSekolah(value) {
@@ -343,6 +403,11 @@ export default {
         this.$emit('submitInsert')
         reset()
       }
+    },
+    deactivateDropdown() {
+      setTimeout(() => {
+        this.isActiveSekolahDropdown = false
+      }, 500)
     },
   },
 }

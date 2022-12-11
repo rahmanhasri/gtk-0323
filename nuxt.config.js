@@ -1,7 +1,11 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   server: {
-    port: 3000,
+    host: '0.0.0.0',
+    port: process.env.PORT || 3002,
   },
   head: {
     title: 'gtk-0323',
@@ -26,7 +30,10 @@ export default {
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [
+    '@/plugins/pie-chart.js',
+    '@/plugins/horizontal-bar-chart.js',
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -71,9 +78,29 @@ export default {
     },
   },
   redirect: {
-    logout: '/login',
-    login: '/',
+    logout: false,
+    login: false,
   },
+
+  toast: {
+    theme: 'outline',
+	  position: 'top-center',
+	  duration : 5000,
+  },
+  fontawesome: {
+    icons: {
+      solid: [
+        'faCircleDown',
+        'faUpload',
+        'faCircleExclamation',
+        'faMagnifyingGlass',
+        'faImage',
+      ],
+    }
+  },
+  // Build Configuration: https://go.nuxtjs.dev/config-build
+  build: {}
+}
 
   toast: {
     theme: 'outline',

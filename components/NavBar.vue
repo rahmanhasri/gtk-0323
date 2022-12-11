@@ -1,8 +1,11 @@
 <template>
-  <nav class="navbar is-success mb-4">
+  <nav class="navbar is-success is-fixed-top">
     <div class="container is-fluid">
       <div class="navbar-brand">
-        <a class="navbar-item brand-text" @click="$router.push('/')"> GTK Admin </a>
+        <figure class="image is-48x48" style="margin: auto; margin-top: 10px;">
+          <img src="@/assets/Sampang.png"  />
+        </figure>
+        <NuxtLink to="/" class="navbar-item brand-text has-text-weight-bold	">SISWA PENTER</NuxtLink>
         <a
           role="button"
           class="navbar-burger"
@@ -22,36 +25,39 @@
         :class="{ 'is-active': isActiveBurger }"
       >
         <div class="navbar-end" :class="{ 'is-hidden': !isActiveBurger }">
-          <a class="navbar-item" @click="$router.push('/')"> Home </a>
+          <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/')"> Home </a>
           <div class="navbar-item has-dropdown">
-            <a class="navbar-link" @click="navSekolah = !navSekolah"> Sekolah </a>
+            <a class="navbar-link" @click.prevent="navSekolah = !navSekolah"> Sekolah </a>
             <div class="navbar-dropdown" :class="{'is-hidden': !navSekolah }">
-              <a class="navbar-item" @click="$router.push('/tambah-sekolah')">
+              <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/tambah-sekolah')">
                 Tambah Sekolah
               </a>
-              <a class="navbar-item" @click="$router.push('/daftar-sekolah')">
+              <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/daftar-sekolah')">
                 Daftar Sekolah
               </a>
             </div>
           </div>
           <div class="navbar-item has-dropdown">
-            <a class="navbar-link" @click="navGuru = !navGuru"> Guru </a>
+            <a class="navbar-link" @click.prevent="navGuru = !navGuru"> Guru </a>
             <div class="navbar-dropdown" :class="{'is-hidden': !navGuru }">
-              <a class="navbar-item" @click="$router.push('/guru/tambah')">
-                Tambah Guru
-              </a>
-              <a class="navbar-item" @click="$router.push('/guru/daftar')">
+              <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/guru/daftar')">
                 Daftar Guru
+              </a>
+              <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/tenaga-pendidik/daftar')">
+                Daftar Tenaga Pendidik
+              </a>
+              <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/guru/tambah')">
+                Tambah
               </a>
             </div>
           </div>
           <div class="navbar-item has-dropdown">
             <a class="navbar-link" @click="navMurid = !navMurid"> Siswa </a>
             <div class="navbar-dropdown" :class="{'is-hidden': !navMurid }">
-              <a class="navbar-item" @click="$router.push('/siswa/tambah')">
+              <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/siswa/tambah')">
                 Tambah Siswa
               </a>
-              <a class="navbar-item" @click="$router.push('/siswa/daftar')">
+              <a class="navbar-item" @click.prevent="clickBurger() || $router.push('/siswa/daftar')">
                 Daftar Siswa
               </a>
             </div>
@@ -90,6 +96,7 @@ export default {
     },
     logout() {
       this.$auth.logout()
+      this.$router.replace('/login')
       this.$auth.$storage.removeUniversal('scopeusr')
     },
   },

@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div style="{ height: '100%', background: 'none' }">
     <NavBar />
-    <div class="container is-fluid">
+    <div class="container is-fluid mt-4 pt-6">
       <div class="columns">
         <div class="column is-2">
           <SideBar />

@@ -11,6 +11,9 @@ export const getters = {
     return state.loading;
   },
 
+  isRootAdmin(state) {
+    return state.userScope === 'all'
+  },
   isProvinsiUser(state) {
     return state.userScope === 'dinasprov'
   },
@@ -21,6 +24,9 @@ export const getters = {
 
   isKemenagUser(state) {
     return state.userScope === 'kemenag'
+  },
+  isReadonlyUser(state) {
+    return state.userScope === 'readonly'
   }
 };
 
@@ -39,6 +45,9 @@ export const mutations = {
   userScope(state, userScope) {
     state.userScope = userScope
   },
+};
+
+export const actions = {
 };
 
 export const actions = {

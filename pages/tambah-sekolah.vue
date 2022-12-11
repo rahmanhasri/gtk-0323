@@ -6,7 +6,7 @@
           <a @click.prevent="() => setTabActive('input')">Input Sekolah</a>
         </li>
         <li :class="{ 'is-active': isTabUnggah }">
-          <a @click.prevent="() => setTabActive('unggah')">Unggah Sekolah</a>
+          <a @click.prevent="() => setTabActive('upload')">Upload Sekolah</a>
         </li>
       </ul>
     </div>
@@ -75,13 +75,14 @@
       <div class="columns">
         <div class="column is-6 field">
           <p class="control">
-            <a
+            <button
               class="button is-primary"
+              :disabled="isReadonlyUser"
               :class="{ 'is-loading': loading }"
               @click.prevent="submitUpload"
             >
               Upload
-            </a>
+            </button>
           </p>
         </div>
       </div>
@@ -130,12 +131,13 @@ export default {
       return this.tabActive === 'input'
     },
     isTabUnggah() {
-      return this.tabActive === 'unggah'
+      return this.tabActive === 'upload'
     },
     ...mapGetters([
       'isProvinsiUser',
       'isDinasPendidikanUser',
       'isKemenagUser',
+      'isReadonlyUser',
       'loading',
     ]),
   },
@@ -146,7 +148,6 @@ export default {
   },
   beforeMount() {
     this.is_madrasah = this.isKemenagUser
-    this.tingkat = this.isProvinsiUser ? 'SMA' : ''
   },
   methods: {
     setTabActive(menu) {
@@ -160,7 +161,7 @@ export default {
       this.kecamatan = sekolah.kecamatan || ''
       this.desa = sekolah.kelurahan_atau_desa || ''
       this.isMadrasah = sekolah.is_madrasah || false
-      this.tingkat = sekolah.tingkat || this.isProvinsiUser ? 'SMA' : ''
+      this.tingkat = sekolah.tingkat || ''
       this.profil = sekolah.profil || ''
       this.isNegeri = sekolah.negeri || false
     },
@@ -176,7 +177,7 @@ export default {
             kecamatan: this.kecamatan,
             kelurahan_atau_desa: this.desa,
             is_madrasah: this.isMadrasah,
-            tingkat: this.isProvinsiUser ? 'SMA' : this.tingkat,
+            tingkat: this.tingkat,
             profil: this.profil,
             jenis: this.isNegeri ? 'negeri' : 'swasta',
             koordinat: this.koordinat,

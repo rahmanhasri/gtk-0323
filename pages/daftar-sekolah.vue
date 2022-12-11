@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container mt-2">
     <div class="columns">
       <div class="column is-3 field">
         <div class="field">
@@ -20,12 +20,32 @@
           <div class="select is-fullwidth">
             <select v-model="tingkatFilter">
               <option value="">Semua tingkat</option>
-              <option v-if="!isProvinsiUser" value="PAUD">PAUD</option>
-              <option v-if="!isProvinsiUser" value="TK">TK</option>
-              <option v-if="!isProvinsiUser" value="SD">SD</option>
-              <option v-if="!isProvinsiUser" value="SMP">SMP</option>
-              <option value="SMA">SMA</option>
-              <option value="SMK">SMK</option>
+              <template v-if="isKemenagUser">
+                  <option value="PAUD">PAUD</option>
+                  <option value="TK">TK</option>
+                  <option value="MI">MI</option>
+                  <option value="MTs">MTs</option>
+                  <option value="MA">MA</option>
+                  <option value="MAK">MAK</option>
+                </template>
+                <template v-else-if="isProvinsiUser">
+                  <option value="MA">MA</option>
+                  <option value="MAK">MAK</option>
+                  <option value="SMA">SMA</option>
+                  <option value="SMK">SMK</option>
+                </template>
+                <template v-else>
+                  <option value="PAUD">PAUD</option>
+                  <option value="TK">TK</option>
+                  <option value="SD">SD</option>
+                  <option value="MI">MI</option>
+                  <option value="SMP">SMP</option>
+                  <option value="MTs">MTs</option>
+                  <option value="SMA">SMA</option>
+                  <option value="MA">MA</option>
+                  <option value="SMK">SMK</option>
+                  <option value="MAK">MAK</option>
+                </template>
             </select>
           </div>
         </div>
@@ -85,6 +105,7 @@
           <tr>
             <th>No.</th>
             <th>Nama Sekolah</th>
+            <th>Tingkat</th>
             <th>Jenis</th>
             <th>Kecamatan</th>
             <th>Kelurahan / Desa</th>
@@ -98,6 +119,7 @@
           >
             <td>{{ index + 1 + (page - 1) * limit }}</td>
             <td>{{ item.nama }}</td>
+            <td>{{ item.tingkat }}</td>
             <td>{{ item.jenis }}</td>
             <td>{{ item.kecamatan }}</td>
             <td>{{ item.kelurahan_atau_desa }}</td>
@@ -118,6 +140,19 @@
           >Next page</a
         >
       </nav>
+      <div class="columns">
+        <div class="column is-4">
+          <p class="control">
+            <button
+              class="button is-primary"
+              :class="{ 'is-loading': loading }"
+              @click.prevent="downloadListSekolah"
+            >
+              Download
+            </button>
+          </p>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -125,6 +160,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { LIST_KECAMATAN, LIST_DESA_BY_KECAMATAN } from '@/utils/constants.mjs'
+import { catchAndToastError } from '@/utils/common'
 
 export default {
   layout: 'Dashboard',
@@ -156,7 +192,7 @@ export default {
         this.limit * this.page
       )
     },
-    ...mapGetters(['isProvinsiUser']),
+    ...mapGetters(['isProvinsiUser', 'isKemenagUser']),
   },
   watch: {},
   beforeMount() {
@@ -213,12 +249,45 @@ export default {
           }
           this.listSekolah = this.listSekolah.concat(res)
         })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
+    downloadListSekolah() {
+      this.$store.commit('loading')
+      const params = {}
+      if (this.search) {
+        params.nama = this.search
+      }
+      if (this.tingkatFilter) {
+        params.tingkat = this.tingkatFilter
+      }
+      if (this.kecamatanFilter) {
+        params.kecamatan = this.kecamatanFilter
+      }
+      if (this.desaFilter) {
+        params.kelurahan_atau_desa = this.desaFilter
+      }
+      this.$auth
+        .requestWith('local', {
+          method: 'GET',
+          url: '/api/sekolah/download-list',
+          params,
+          responseType: 'blob',
+        })
+        .then(res => {
+          this.$store.commit('finishLoading')
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', 'daftar-sekolah.xlsx')
+          document.body.appendChild(fileLink)
+
+          fileLink.click()
+        })
+        .catch(_err => {
+          this.$toast.error('Error pada server, agal mengunduh daftar sekolah')
+        })
+    }
   },
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="tabs">
+    <div v-if="$route.name.includes('guru')" class="tabs">
       <ul>
         <li :class="{ 'is-active': isTabInput }">
           <a @click.prevent="() => setTabActive('input')"
@@ -8,12 +8,13 @@
           >
         </li>
         <li :class="{ 'is-active': isTabUnggah }">
-          <a @click.prevent="() => setTabActive('unggah')">Unggah</a>
+          <a @click.prevent="() => setTabActive('upload')">Upload</a>
         </li>
       </ul>
     </div>
     <div v-if="isTabInput" class="section">
       <GuruFormsVue
+        v-if="!loading"
         :nama="nama"
         :no-ktp="noKtp"
         :nuptk="nuptk"
@@ -21,9 +22,12 @@
         :no-ponsel="noPonsel"
         :ptk="ptk"
         :jenis-kelamin="jenisKelamin"
+        :kategori="kategori"
         :jabatan="jabatan"
         :status="status"
         :is-submit="true"
+        :sekolah-name="sekolah.nama"
+        :sekolah-id="sekolahId"
         :daftar-sekolah="daftarSekolah"
         @changeSekolahId="sekolahId = $event"
         @changeNama="nama = $event"
@@ -35,6 +39,7 @@
         @changeJenisKelamin="jenisKelamin = $event"
         @changeJabatan="jabatan = $event"
         @changeStatus="status = $event"
+        @changeKategori="kategori = $event"
         @submitInsert="submitInsert"
       />
     </div>
@@ -78,13 +83,14 @@
       <div class="columns">
         <div class="column is-6 field">
           <p class="control">
-            <a
+            <button
               class="button is-primary"
+              :disabled="isReadonlyUser"
               :class="{ 'is-loading': loading }"
               @click.prevent="submitUpload"
             >
               Upload
-            </a>
+          </button>
           </p>
         </div>
       </div>
@@ -97,10 +103,7 @@ import { mapGetters } from 'vuex'
 import GuruFormsVue from '@/components/GuruForms.vue'
 import { catchAndToastError } from '@/utils/common'
 import { EXCEL_CONTENT_TYPE } from '@/utils/constants.mjs'
-// const guruReqDto = [
-//   'tanggal_lahir', // TODO:
-//   'latar_belakang', // TODO:
-// ]
+
 export default {
   name: 'GuruInput',
   components: {
@@ -111,6 +114,9 @@ export default {
   data() {
     return {
       tabActive: 'input',
+      sekolah: {
+        nama: '',
+      },
       // populate
       daftarSekolah: [],
       // forms
@@ -122,6 +128,7 @@ export default {
       ptk: '',
       jenisKelamin: '',
       sekolahId: '',
+      kategori: '',
       jabatan: '',
       status: '',
       // upload
@@ -134,13 +141,14 @@ export default {
       'isProvinsiUser',
       'isDinasPendidikanUser',
       'isKemenagUser',
+      'isReadonlyUser',
       'loading',
     ]),
     isTabInput() {
       return this.tabActive === 'input'
     },
     isTabUnggah() {
-      return this.tabActive === 'unggah'
+      return this.tabActive === 'upload'
     },
   },
   beforeMount() {
@@ -155,6 +163,7 @@ export default {
     previewFiles(e) {
       const file = e.target.files[0]
       this.fileName = file.name
+      this.file = file
     },
     // REST API
     getListSekolahFilter() {
@@ -166,13 +175,14 @@ export default {
         })
         .then((res) => {
           this.daftarSekolah = res
+          const sekolahId = this.$route.query['sekolah-id']
+          if (sekolahId) {
+            this.sekolah = (res || []).find(s => s.id === sekolahId)
+            this.sekolahId = sekolahId
+          }
           this.$store.commit('finishLoading')
         })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
     populateGuru(guru = {}) {
       this.nama = guru.nama || ''
@@ -185,6 +195,7 @@ export default {
       this.sekolah_id = guru.sekolah_id || ''
       this.jabatan = guru.jabatan || ''
       this.status = guru.status || ''
+      this.kategori = guru.kategori || ''
     },
     submitInsert() {
       this.$store.commit('loading')
@@ -199,6 +210,7 @@ export default {
         sekolah_id: this.sekolahId,
         jabatan: this.jabatan,
         status: this.status,
+        kategori: this.kategori,
       }
       this.$auth
         .requestWith('local', {
@@ -211,11 +223,7 @@ export default {
           this.$store.commit('finishLoading')
           this.populateGuru()
         })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle Error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
     downloadTemplate() {
       this.$store.commit('loading')
@@ -231,7 +239,7 @@ export default {
           const fileLink = document.createElement('a')
 
           fileLink.href = fileURL
-          fileLink.setAttribute('download', 'template-guru.xlsx')
+          fileLink.setAttribute('download', 'template-guru-dan-tenaga-pendidik.xlsx')
           document.body.appendChild(fileLink)
 
           fileLink.click()

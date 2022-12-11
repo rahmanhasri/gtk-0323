@@ -8,6 +8,7 @@
         <th>Jenis Kelamin</th>
         <th>Tahun Angkatan</th>
         <th>Nama Sekolah</th>
+        <th>Status Aktif</th>
       </tr>
     </thead>
     <tbody>
@@ -24,6 +25,7 @@
         <td @click="$router.push('/sekolah/' + item?.sekolah?.id)">
           <a @click.prevent>{{ item.sekolah?.nama }}</a>
         </td>
+        <td>{{ item.is_active ? 'Aktif' : 'Tidak Aktif' }}</td>
       </tr>
     </tbody>
   </table>

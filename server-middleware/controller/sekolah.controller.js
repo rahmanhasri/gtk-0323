@@ -28,9 +28,10 @@ const sekolahController = {
     const sekolah = await prisma.sekolah.findFirst({
       where: { id: req.params.id },
       include: {
-        daftar_siswa: true,
-        daftar_guru: true,
-        daftar_sarana_prasarana: true,
+        daftar_sarana_prasarana: {
+          select: utils.reduceStringArrayToObjValue(['id', 'jenis', 'kondisi', 'nama', 'daftar_foto_url'], true),
+          where: { deleted: false },
+        },
       },
     })
     return res.json(sekolah)
@@ -83,6 +84,7 @@ const sekolahController = {
           mode: 'insensitive',
         },
       },
+      orderBy: [{ created_at: 'desc' }],
     })
 
     return res.json(listSekolah)
@@ -139,7 +141,7 @@ const sekolahController = {
         nama: sekolah[1].trim(),
         kecamatan: sekolah[2].trim(),
         kelurahan_atau_desa: sekolah[3].trim(),
-        is_madrasah: sekolah[4],
+        is_madrasah: Boolean(sekolah[4]),
         jenis: (sekolah[5] || '').toLowerCase().trim(),
         tingkat: sekolah[6].trim(),
         profil: sekolah[7].trim(),
@@ -147,7 +149,6 @@ const sekolahController = {
         npsn: sekolah[10].trim()
       }
 
-      console.log(newSekolah)
       if (!allowInsert) {
         output.push({ ...newSekolah, hasil_upload: 'Akses tidak diizinkan' })
         continue
@@ -165,7 +166,6 @@ const sekolahController = {
           },
           data: newSekolah,
         })
-        console.log('UPDATED')
         output.push({ id: existingSekolah.id, ...newSekolah, hasil_upload: 'Diperbaharui' })
       } else {
         const created = await prisma.sekolah.create({
@@ -174,7 +174,6 @@ const sekolahController = {
             ...newSekolah,
           }
         })
-        console.log('NEW')
         output.push({ ...created, hasil_upload: 'Terbuat Baru' })
       }
     }

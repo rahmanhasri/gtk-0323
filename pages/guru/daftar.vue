@@ -1,41 +1,74 @@
 <template>
-  <div class="container">
+  <div class="container mt-2">
     <div class="columns">
       <div class="column is-3 field">
         <div class="field">
-          <label class="label">Cari Guru</label>
+          <label class="label">Cari {{ labelEntity }}</label>
           <div class="control">
             <input
               v-model="search"
               class="input"
               type="text"
-              placeholder="Nama Guru / NUPTK Guru"
+              placeholder="Nama / NUPTK"
             />
           </div>
         </div>
       </div>
+
+      <div class="column is-3 field">
+        <label class="label">Status</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select
+              :value="statusFilter"
+              @change="statusFilter = $event.target.value"
+            >
+              <option value="" disabled selected>Pilih Status</option>
+              <option value="PNS">PNS</option>
+              <option value="PPPK" selected>PPPK</option>
+              <option v-if="labelEntity !== 'Guru'" value="NON-PNS">
+                Non-PNS
+              </option>
+              <option v-else value="GTT">Guru Tidak Tetap</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div class="column is-3 field">
         <label class="label">Tingkat Sekolah</label>
         <div class="control">
           <div class="select is-fullwidth">
             <select
-              :disabled="isProvinsiUser"
               :value="tingkatFilter"
               @change="changeTingkatSekolah($event.target.value)"
             >
-              <template v-if="isProvinsiUser">
-                <option value="" disabled selected>SMA / SMK</option>
-              </template>
-              <template v-else>
-                <option value="" disabled selected>
-                  Pilih Tingkat Sekolah
-                </option>
-                <option value="TK">TK</option>
+              <option value="">Semua tingkat</option>
+              <template v-if="isKemenagUser">
                 <option value="PAUD">PAUD</option>
-                <option value="SD">SD</option>
-                <option value="SMP">SMP</option>
+                <option value="TK">TK</option>
+                <option value="MI">MI</option>
+                <option value="MTs">MTs</option>
+                <option value="MA">MA</option>
+                <option value="MAK">MAK</option>
+              </template>
+              <template v-else-if="isProvinsiUser">
+                <option value="MA">MA</option>
+                <option value="MAK">MAK</option>
                 <option value="SMA">SMA</option>
                 <option value="SMK">SMK</option>
+              </template>
+              <template v-else>
+                <option value="PAUD">PAUD</option>
+                <option value="TK">TK</option>
+                <option value="SD">SD</option>
+                <option value="MI">MI</option>
+                <option value="SMP">SMP</option>
+                <option value="MTs">MTs</option>
+                <option value="SMA">SMA</option>
+                <option value="MA">MA</option>
+                <option value="SMK">SMK</option>
+                <option value="MAK">MAK</option>
               </template>
             </select>
           </div>
@@ -62,56 +95,67 @@
         </div>
       </div>
     </div>
+
     <div class="columns">
       <div class="column is-4">
         <p class="control">
           <a
             class="button is-primary"
             :class="{ 'is-loading': loading }"
-            @click="getListGuru(true)"
+            @click.prevent="getListGuru(true)"
           >
             Cari
           </a>
         </p>
       </div>
     </div>
-    <template v-if="daftarGuru.length > 0">
-      <TableGuruVue
-        :paginated-list-guru="paginatedListGuru"
-        :page="page"
-        :limit="limit"
-      />
-      <TablePagination
-        :length="paginatedListGuru.length"
-        :page="page"
-        :limit="limit"
-        @turnPage="turnPage($event)"
-      />
-      <div class="columns">
-        <div class="column is-4">
-          <p class="control">
-            <a
-              class="button is-primary"
-              :class="{ 'is-loading': loading }"
-              @click="downloadListGuru"
-            >
-              Download
-            </a>
-          </p>
-        </div>
+    <TableGuruVue
+      :paginated-list-guru="paginatedListGuru"
+      :page="page"
+      :limit="limit"
+      :is-guru="labelEntity === 'Guru'"
+    />
+    <TablePagination
+      :length="paginatedListGuru.length"
+      :page="page"
+      :limit="limit"
+      @turnPage="turnPage($event)"
+    />
+    <div v-if="daftarGuru.length > 0" class="columns">
+      <div class="column is-4">
+        <p class="control">
+          <button
+            class="button is-primary"
+            :class="{ 'is-loading': loading }"
+            @click.prevent="downloadListGuru"
+          >
+            Download
+          </button>
+        </p>
       </div>
-    </template>
+    </div>
 
-    <p v-else class="title is-4">
-      <font-awesome-icon icon="circle-exclamation" /> Daftar Guru Kosong
-    </p>
+    <div v-if="(labelEntity !== 'Guru' && !isReadonlyUser)" class="columns">
+      <div class="column is-4">
+        <p class="control">
+          <a
+            class="button is-info"
+            @click.prevent="$router.push('/tenaga-pendidik/tambah')"
+          >
+            Tambah Tenaga Pendidik
+          </a>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import * as constants from '@/utils/constants.mjs'
 import TableGuruVue from '@/components/TableGuru.vue'
 import TablePagination from '@/components/TablePagination.vue'
+import { catchAndToastError } from '@/utils/common'
 
 export default {
   name: 'DaftarGuru',
@@ -133,10 +177,11 @@ export default {
       newFilter: false,
       tingkatFilter: '',
       sekolahIdFilter: '',
+      statusFilter: '',
     }
   },
   computed: {
-    ...mapGetters(['loading', 'isProvinsiUser']),
+    ...mapGetters(['loading', 'isProvinsiUser', 'isKemenagUser', 'isReadonlyUser']),
     paginatedListGuru() {
       return this.daftarGuru.slice(
         this.limit * (this.page - 1),
@@ -150,6 +195,9 @@ export default {
         }
         return true
       })
+    },
+    labelEntity() {
+      return this.$route.name.includes('guru') ? 'Guru' : 'Tenaga Pendidik'
     },
   },
   beforeMount() {
@@ -175,13 +223,21 @@ export default {
     getListGuru(isNewFilter = false) {
       this.newFilter = isNewFilter
       this.$store.commit('loading')
-      const params = {}
+      const params = {
+        kategori:
+          this.labelEntity === 'Guru'
+            ? constants.GURU
+            : constants.TENAGA_PENDIDIK,
+      }
       if (this.search) {
         params.nama = this.search
         params.nuptk = this.search
       }
       if (this.sekolahIdFilter) {
         params.sekolah_id = this.sekolahIdFilter
+      }
+      if (this.statusFilter) {
+        params.status = this.statusFilter
       }
       this.$auth
         .requestWith('local', {
@@ -204,11 +260,7 @@ export default {
           }
           this.daftarGuru = this.daftarGuru.concat(res)
         })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
     getListSekolahFilter() {
       this.$store.commit('loading')
@@ -221,14 +273,43 @@ export default {
           this.daftarSekolahId = res
           this.$store.commit('finishLoading')
         })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
     downloadListGuru() {
-      // TODO: integrate with API
+      this.$store.commit('loading')
+
+      const kategori = this.labelEntity === 'Guru' ? constants.GURU : constants.TENAGA_PENDIDIK
+
+      const params = { kategori }
+
+      if (this.search) {
+        params.nama = this.search
+        params.nuptk = this.search
+      }
+      if (this.sekolahIdFilter) {
+        params.sekolah_id = this.sekolahIdFilter
+      }
+      this.$auth
+        .requestWith('local', {
+          method: 'GET',
+          url: '/api/tenaga-guru/download-list',
+          params,
+          responseType: 'blob',
+        })
+        .then((res) => {
+          this.$store.commit('finishLoading')
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', `daftar-${kategori}.xlsx`)
+          document.body.appendChild(fileLink)
+
+          fileLink.click()
+        })
+        .catch((_err) => {
+          this.$toast.error('Error pada server, gagal mengunduh daftar sekolah')
+        })
     },
   },
 }

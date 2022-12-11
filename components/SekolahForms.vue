@@ -27,7 +27,7 @@
         </div>
       </ValidationProvider>
 
-      <div v-if="!isSubmit" class="column is-2 is-offset-1">
+      <div v-if="(!isSubmit && !isReadonlyUser)" class="column is-2 is-offset-1">
         <div class="field">
           <label class="label"> Edit </label>
           <input
@@ -134,18 +134,38 @@
             <div class="select" :class="{ 'is-danger': errors[0] }">
               <select
                 v-model="form.tingkat"
-                :disabled="isProvinsiUser || viewOnly"
+                :disabled="viewOnly"
                 @change="$emit('changeTingkat', $event.target.value)"
               >
                 <option value="" disabled selected>
                   Pilih Tingkat Sekolah
                 </option>
-                <option value="TK">TK</option>
-                <option value="PAUD">PAUD</option>
-                <option value="SD">SD</option>
-                <option value="SMP">SMP</option>
-                <option value="SMA">SMA</option>
-                <option value="SMK">SMK</option>
+                <template v-if="isKemenagUser">
+                  <option value="PAUD">PAUD</option>
+                  <option value="TK">TK</option>
+                  <option value="MI">MI</option>
+                  <option value="MTs">MTs</option>
+                  <option value="MA">MA</option>
+                  <option value="MAK">MAK</option>
+                </template>
+                <template v-else-if="isProvinsiUser">
+                  <option value="MA">MA</option>
+                  <option value="MAK">MAK</option>
+                  <option value="SMA">SMA</option>
+                  <option value="SMK">SMK</option>
+                </template>
+                <template v-else>
+                  <option value="PAUD">PAUD</option>
+                  <option value="TK">TK</option>
+                  <option value="SD">SD</option>
+                  <option value="MI">MI</option>
+                  <option value="SMP">SMP</option>
+                  <option value="MTs">MTs</option>
+                  <option value="SMA">SMA</option>
+                  <option value="MA">MA</option>
+                  <option value="SMK">SMK</option>
+                  <option value="MAK">MAK</option>
+                </template>
               </select>
             </div>
           </div>
@@ -217,12 +237,12 @@
     <div class="columns">
       <client-only>
         <div id="map-wrap" style="height: 300px" class="column is-10">
-          <l-map :zoom="13" :center="koordinat">
+          <l-map :zoom="13" :center="form.koordinat">
             <l-tile-layer
               url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
             ></l-tile-layer>
             <l-marker
-              :lat-lng="koordinat"
+              :lat-lng="form.koordinat"
               draggable
               @dragend="onDragEnd"
             ></l-marker>
@@ -235,10 +255,10 @@
         <div v-if="isSubmit" class="field">
           <div class="control">
             <button
-              :disabled="invalid"
+              :disabled="(invalid || isReadonlyUser)"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="submitInsert(reset)"
+              @click.prevent="submitInsert(reset)"
             >
               Submit
             </button>
@@ -246,12 +266,11 @@
         </div>
         <div v-else class="field">
           <div class="control">
-              <!-- :disabled="invalid" -->
             <button
-              :disabled="invalid"
+              :disabled="(invalid || isReadonlyUser || viewOnly)"
               :class="{ 'is-loading': loading }"
               class="button is-primary"
-              @click="validate() && submitEdit()"
+              @click.prevent="validate() && $emit('submitEdit')"
             >
               Save
             </button>
@@ -288,6 +307,7 @@ export default {
     tingkat: { type: String, default: 'SMA' },
     profil: { type: String, default: '' },
     isNegeri: { type: Boolean, default: false },
+    koordinat: { type: Array, default: Array },
     // menu
     isSubmit: { type: Boolean, default: true },
     viewOnly: { type: Boolean, default: false },
@@ -295,7 +315,6 @@ export default {
   },
   data() {
     return {
-      koordinat: DEFAULT_KOOR_SAMPANG || [],
       form: {
         nama: this.nama,
         npsn: this.npsn,
@@ -304,6 +323,7 @@ export default {
         isMadrasah: this.isMadrasah,
         tingkat: this.tingkat,
         isNegeri: this.isNegeri,
+        koordinat: this.koordinat.length ? this.koordinat : DEFAULT_KOOR_SAMPANG,
       }
     }
   },
@@ -315,6 +335,7 @@ export default {
       'isProvinsiUser',
       'isDinasPendidikanUser',
       'isKemenagUser',
+      'isReadonlyUser',
       'loading',
     ]),
   },
@@ -327,11 +348,11 @@ export default {
     },
     changeKecamatan(value) {
       this.$emit('changeKecamatan', value)
-      this.koordinat = LIST_KOOR_KECAMATAN[value]
+      this.form.koordinat = LIST_KOOR_KECAMATAN[value]
     },
     onDragEnd(marker) {
       const { lat, lng } = marker.target._latlng
-      this.koordinat = [String(lat), String(lng)]
+      this.form.koordinat = [String(lat), String(lng)]
       this.$emit('changeKoordinat', [String(lat), String(lng)])
     },
     async submitInsert(reset) {

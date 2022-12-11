@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container mt-2">
     <div class="columns">
       <div class="column is-3 field">
         <div class="field">
@@ -14,28 +14,59 @@
           </div>
         </div>
       </div>
+
+      <div class="column is-3 field">
+        <label class="label">Tahun Angkatan</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select @change="tahunFilter = $event.target.value">
+              <option value="" selected>Semua Tahun</option>
+              <option
+                v-for="i in 10"
+                :key="'opt_tahun' + i"
+                :value="new Date().getFullYear() - i + 1"
+              >
+                {{ new Date().getFullYear() - i + 1 }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div class="column is-3 field">
         <label class="label">Tingkat Sekolah</label>
         <div class="control">
           <div class="select is-fullwidth">
             <select
-              :disabled="isProvinsiUser"
               :value="tingkatFilter"
               @change="changeTingkatSekolah($event.target.value)"
             >
-              <template v-if="isProvinsiUser">
-                <option value="" disabled selected>SMA / SMK</option>
-              </template>
-              <template v-else>
-                <option value="" disabled selected>
-                  Pilih Tingkat Sekolah
-                </option>
-                <option value="TK">TK</option>
+              <option value="">Semua tingkat</option>
+              <template v-if="isKemenagUser">
                 <option value="PAUD">PAUD</option>
-                <option value="SD">SD</option>
-                <option value="SMP">SMP</option>
+                <option value="TK">TK</option>
+                <option value="MI">MI</option>
+                <option value="MTs">MTs</option>
+                <option value="MA">MA</option>
+                <option value="MAK">MAK</option>
+              </template>
+              <template v-else-if="isProvinsiUser">
+                <option value="MA">MA</option>
+                <option value="MAK">MAK</option>
                 <option value="SMA">SMA</option>
                 <option value="SMK">SMK</option>
+              </template>
+              <template v-else>
+                <option value="PAUD">PAUD</option>
+                <option value="TK">TK</option>
+                <option value="SD">SD</option>
+                <option value="MI">MI</option>
+                <option value="SMP">SMP</option>
+                <option value="MTs">MTs</option>
+                <option value="SMA">SMA</option>
+                <option value="MA">MA</option>
+                <option value="SMK">SMK</option>
+                <option value="MAK">MAK</option>
               </template>
             </select>
           </div>
@@ -68,29 +99,37 @@
           <a
             class="button is-primary"
             :class="{ 'is-loading': loading }"
-            @click="getListSiswa(true)"
+            @click.prevent="getListSiswa(true)"
           >
             Cari
           </a>
         </p>
       </div>
     </div>
-    <template v-if="daftarSiswa.length > 0">
-      <TableSiswaVue
-        :paginated-list-siswa="paginatedListSiswa"
-        :page="page"
-        :limit="limit"
-      />
-      <TablePagination
-        :length="paginatedListSiswa.length"
-        :page="page"
-        :limit="limit"
-        @turnPage="turnPage($event)"
-      />
-    </template>
-    <p v-else class="title is-4">
-      <font-awesome-icon icon="circle-exclamation" /> Daftar Siswa Kosong
-    </p>
+    <TableSiswaVue
+      :paginated-list-siswa="paginatedListSiswa"
+      :page="page"
+      :limit="limit"
+    />
+    <TablePagination
+      :length="paginatedListSiswa.length"
+      :page="page"
+      :limit="limit"
+      @turnPage="turnPage($event)"
+    />
+    <div v-if="daftarSiswa.length > 0" class="columns">
+      <div class="column is-4">
+        <p class="control">
+          <button
+            class="button is-primary"
+            :class="{ 'is-loading': loading }"
+            @click.prevent="downloadListSiswa"
+          >
+            Download
+          </button>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -98,6 +137,7 @@
 import { mapGetters } from 'vuex'
 import TableSiswaVue from '@/components/TableSiswa.vue'
 import TablePagination from '@/components/TablePagination.vue'
+import { catchAndToastError } from '@/utils/common'
 
 export default {
   name: 'DaftarSiswa',
@@ -119,10 +159,11 @@ export default {
       newFilter: false,
       tingkatFilter: '',
       sekolahIdFilter: '',
+      tahunFilter: '',
     }
   },
   computed: {
-    ...mapGetters(['loading', 'isProvinsiUser']),
+    ...mapGetters(['loading', 'isProvinsiUser', 'isKemenagUser']),
     paginatedListSiswa() {
       return this.daftarSiswa.slice(
         this.limit * (this.page - 1),
@@ -169,6 +210,9 @@ export default {
       if (this.tingkatFilter) {
         params.tingkat = this.tingkatFilter
       }
+      if (this.tahunFilter) {
+        params.tahun_angkatan = this.tahunFilter
+      }
       this.$auth
         .requestWith('local', {
           method: 'GET',
@@ -187,11 +231,7 @@ export default {
 
           this.daftarSiswa = this.daftarSiswa.concat(res)
         })
-        .catch((err) => {
-          this.$store.commit('finishLoading')
-          // TODO: Handle error
-          console.log('ERR', err)
-        })
+        .catch(catchAndToastError(this))
     },
     getListSekolahFilter() {
       this.$store.commit('loading')
@@ -204,10 +244,38 @@ export default {
           this.daftarSekolahId = res
           this.$store.commit('finishLoading')
         })
-        .catch((err) => {
+        .catch(catchAndToastError(this))
+    },
+    downloadListSiswa() {
+      this.$store.commit('loading')
+      const params = {}
+      if (this.search) {
+        params.nama = this.search
+        params.nomor_induk_nasional = this.search
+      }
+      if (this.tingkatFilter) {
+        params.tingkat = this.tingkatFilter
+      }
+      this.$auth
+        .requestWith('local', {
+          method: 'GET',
+          url: '/api/siswa/download-list',
+          params,
+          responseType: 'blob',
+        })
+        .then((res) => {
           this.$store.commit('finishLoading')
-          // TODO: Handle error
-          console.log('ERR', err)
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', 'daftar-siswa.xlsx')
+          document.body.appendChild(fileLink)
+
+          fileLink.click()
+        })
+        .catch((_err) => {
+          this.$toast.error('Error pada server, agal mengunduh daftar sekolah')
         })
     },
   },

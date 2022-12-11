@@ -24,13 +24,16 @@ const guruReqDto = [
   'latar_belakang',
   'jabatan',
   'status',
+  'kategori',
+  'is_active',
+  'jenjang',
 ]
 
 const actionGuru = {
   findListByUserAccess: async (req) => {
     const { user } = req
     const query = utils.addQuerySekolahByUserAccess(
-      utils.pick(req.query, ['nama', 'nuptk', 'sekolah_id', 'status']),
+      utils.pick(req.query, ['nama', 'kategori', 'nuptk', 'sekolah_id', 'status']),
       user,
     )
     const queryGuru = []
@@ -49,28 +52,39 @@ const actionGuru = {
       queryGuru.push({ nuptk: { contains: query.nuptk, mode: 'insensitive' } })
     }
 
-    const whereCondition = { sekolah: querySekolahUserAccess }
+    const whereCondition = { sekolah: querySekolahUserAccess, AND: [{ deleted: false }] }
 
     if (queryGuru.length) {
       whereCondition.OR = queryGuru
     }
     if (query.sekolah_id) {
-      whereCondition.AND = [{ sekolah_id: query.sekolah_id }]
+      whereCondition.AND = whereCondition.AND.concat([{ sekolah_id: query.sekolah_id }])
     }
-
+    if (query.kategori) {
+      whereCondition.AND = whereCondition.AND.concat([{ kategori: query.kategori }])
+    }
     if (query.status) {
-      whereCondition.AND = (whereCondition.AND || []).concat([{ status: query.status }])
+      whereCondition.AND = whereCondition.AND.concat([{ status: query.status }])
     }
 
     const list = await prisma.tenagaPendidikanGuru.findMany({
       ...utils.prismaPagination(req.query.page, req.query.limit),
       where: whereCondition,
       select: {
-        ...(utils.reduceStringArrayToObjValue(['id', 'nama', 'jabatan', 'status', 'nuptk'], true)),
+        ...(utils.reduceStringArrayToObjValue(
+            [
+              'id', 'nama', 'kategori', 'no_ktp', 'nuptk', 'no_ponsel',
+              'tanggal_lahir', 'alamat', 'jenis_kelamin', 'ptk', 'latar_belakang',
+              'status', 'jabatan', 'jenjang', 'is_active',
+            ],
+            true,
+          )
+        ),
         sekolah: {
           select: utils.reduceStringArrayToObjValue(['id', 'nama', 'npsn'], true),
         },
       },
+      orderBy: [{ created_at: 'desc' }],
     })
     return list
   }
@@ -89,6 +103,9 @@ const tenagaGuruController = {
   create: async (req, res) => {
     const tenagaGuruReq = utils.pick(req.body, guruReqDto)
     tenagaGuruReq.id = uuid.v4()
+    if (!tenagaGuruReq.kategori) {
+      tenagaGuruReq.kategori = constants.GURU
+    }
     const created = await prisma.tenagaPendidikanGuru.create({
       data: tenagaGuruReq,
     })
@@ -101,7 +118,7 @@ const tenagaGuruController = {
       return res.status(400).send('id is required')
     }
 
-    await prisma.sekolah.update({
+    await prisma.tenagaPendidikanGuru.update({
       where: { id },
       data: guruReq,
     })
@@ -109,7 +126,7 @@ const tenagaGuruController = {
     return res.json({ message: 'ok' })
   },
   downloadTenagaGuruTemplate: (_req, res) => {
-    res.sendFile(utils.pathResolve('/templates/template-guru.xlsx'), (err) => {
+    res.sendFile(utils.pathResolve('/templates/template-guru-dan-tenaga-pendidik.xlsx'), (err) => {
       if (err) {
         console.error(err)
         return res.status(500).json({
@@ -136,28 +153,55 @@ const tenagaGuruController = {
         },
       })
 
+      const jenjang = tenagaGuru[14] === '-' ? '' : (tenagaGuru[14] || '').toLowerCase()
       const newTenagaGuru = {
-        id: uuid.v4(),
         nama: tenagaGuru[1].trim(),
         sekolah_id: sekolah ? sekolah.id : '',
-        no_ktp: String(tenagaGuru[3]),
-        nuptk: String(tenagaGuru[4]),
-        no_ponsel: tenagaGuru[5].trim(),
-        // tanggal_lahir: new Date(tenagaGuru[6]),
-        alamat: (tenagaGuru[7] || '').trim(),
-        jenis_kelamin: tenagaGuru[8].toUpperCase(),
-        ptk: (tenagaGuru[9] || ''),
-        latar_belakang: (tenagaGuru[10] || '').trim(),
-        status: tenagaGuru[11].toUpperCase(),
-        jabatan: tenagaGuru[12] || ''
+        kategori: tenagaGuru[3].toLowerCase() || constants.GURU,
+        no_ktp: String(tenagaGuru[4]),
+        nuptk: String(tenagaGuru[5]),
+        no_ponsel: tenagaGuru[6].trim(),
+        tanggal_lahir: new Date(tenagaGuru[7]),
+        alamat: (tenagaGuru[8] || '').trim(),
+        jenis_kelamin: tenagaGuru[9].toUpperCase(),
+        ptk: (tenagaGuru[10] || ''),
+        latar_belakang: (tenagaGuru[11] || '').trim(),
+        status: tenagaGuru[12].toUpperCase(),
+        jabatan: tenagaGuru[13] || '',
+        jenjang,
       }
 
-      // TODO: AllowInsert By User Access
-      // TODO: Upsert by nomor_ktp
+      if (newTenagaGuru.kategori === constants.GURU && newTenagaGuru.status === constants.NON_PNS) {
+        newTenagaGuru.status = constants.GURU_TIDAK_TETAP
+      }
+
       if (!sekolah) {
         uploadMessage = 'GAGAL UPLOAD: NPSN Sekolah tidak terdaftar'
+      } else if (!utils.validateUploadSekolah(
+          req.user,
+          { tingkat: sekolah?.tingkat, is_madrasah: sekolah?.is_madrasah }
+        )
+      ) {
+        uploadMessage = 'Akses tidak diizinkan'
       } else {
-        createMany.push(newTenagaGuru)
+        // Update or create
+        let existing = null
+        if (newTenagaGuru.no_ktp) {
+          existing = await prisma.tenagaPendidikanGuru.findFirst({
+            where: { no_ktp: newTenagaGuru.no_ktp },
+          })
+        }
+
+        if (existing) {
+          uploadMessage = 'Data sama dengan nomor ktp telah diperbaharui'
+          await prisma.tenagaPendidikanGuru.updateMany({
+            where: { no_ktp: newTenagaGuru.no_ktp },
+            data: newTenagaGuru,
+          })
+        } else {
+          newTenagaGuru.id = uuid.v4()
+          createMany.push(newTenagaGuru)
+        }
       }
 
       output.push({
@@ -172,7 +216,7 @@ const tenagaGuruController = {
     })
 
     const workbook = await excelUtils.writeExcel(
-      '/templates/template-guru.xlsx',
+      '/templates/template-guru-dan-tenaga-pendidik.xlsx',
       output,
       constants.GURU,
       true,
@@ -190,7 +234,7 @@ const tenagaGuruController = {
   },
   findGuruBySekolahId: async (req, res) => {
     const result = await prisma.tenagaPendidikanGuru.findMany({
-      where: { sekolah_id: req.params.id }
+      where: { sekolah_id: req.params.id, deleted: false }
     })
 
     return res.status(200).json(result)
@@ -198,14 +242,21 @@ const tenagaGuruController = {
   downloadListByUserAccess: async (req, res) => {
   const list = await actionGuru.findListByUserAccess(req)
   const workbook = await excelUtils.writeExcel(
-    '/templates/template-guru.xlsx',
+    '/templates/template-guru-dan-tenaga-pendidik.xlsx',
     list,
     constants.GURU,
   )
 
   await excelUtils
     .sendWorkBookAsResponse(res, { workbook, fileName: 'list-guru.xlsx' })
-  }
+  },
+  delete: async (req, res) => {
+    await prisma.tenagaPendidikanGuru.delete({
+      where: { id: req.params.id },
+    })
+
+    return res.json({ message: 'ok' })
+  },
 }
 
 router.get('/download-template', utils.errorWrapper(tenagaGuruController.downloadTenagaGuruTemplate))
@@ -216,6 +267,7 @@ router.get('/:id', utils.errorWrapper(tenagaGuruController.findOne))
 router.put('/', utils.errorWrapper(tenagaGuruController.update))
 router.post('/', utils.errorWrapper(tenagaGuruController.create))
 router.post('/upload', multipart.single('file'), uploadValidation, utils.errorWrapper(tenagaGuruController.upload))
+router.delete('/:id', utils.errorWrapper(tenagaGuruController.delete))
 
 export default {
   path: '/tenaga-guru',

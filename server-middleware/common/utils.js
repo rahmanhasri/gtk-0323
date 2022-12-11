@@ -17,8 +17,10 @@ export const errorWrapper = (fn) => async (req, res, next) => {
 
 export const pick = (object, keys) => {
   return keys.reduce((result, key) => {
-     if (object && Object.prototype.hasOwnProperty.call(object, key) && object[key]) {
+     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
+      if (typeof object[key] !== "undefined" || object[key] !== null || object[key] !== "") {
         result[key] = object[key];
+      }
      }
      return result;
    }, {});
@@ -73,7 +75,7 @@ export const pathResolve = (filePath) => {
 export const addQuerySekolahByUserAccess = (reqQuery, user) => {
   if (user?.level === 'operator') {
     if (user.scope === 'dinasprov') {
-      return { ...reqQuery, tingkat: 'SMA' }
+      return { ...reqQuery, tingkat: { in: ['SMA', 'SMK', 'MA', 'MAK'] } }
     } else if (user.scope === 'kemenag') {
       return { ...reqQuery, is_madrasah: true }
     } else if (user.scope === 'pendidikan') {
@@ -86,7 +88,7 @@ export const addQuerySekolahByUserAccess = (reqQuery, user) => {
 export const validateUploadSekolah = (user, sekolahReqDto) => {
   if (user?.level === 'operator') {
     if (user.scope === 'dinasprov') {
-      return sekolahReqDto.tingkat === 'SMA'
+      return ['SMA', 'SMK', 'MA', 'MAK'].includes(sekolahReqDto.tingkat)
     } else if (user.scope === 'kemenag') {
       return sekolahReqDto.is_madrasah === true
     } else if (user.scope === 'pendidikan') {
