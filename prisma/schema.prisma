@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Sekolah {
+  id                      String  @id @db.Uuid @default(uuid())
+  kecamatan               String  @db.VarChar(255)
+  kelurahan_atau_desa     String? @db.VarChar(255)
+  nama                    String  @db.VarChar(255)
+  is_madrasah             Boolean?
+  tingkat                 String  @db.VarChar(8)
+  // TK, PAUD, SD, SMP, SMA, SMK
+  profil                  String? @db.Text
+  jenis                   String  @db.VarChar(8)
+  // Negeri Swasta
+  npsn                    String @unique @db.VarChar(16)
+  koordinat               String[]
+  // no_telp                 String?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  daftar_siswa            Siswa[]
+  daftar_guru             TenagaPendidikanGuru[]
+  daftar_sarana_prasarana SaranaPrasarana[]
+}
+
+model Siswa {
+  id                    String    @id @db.Uuid @default(uuid())
+  nama                  String    @default("") @db.VarChar(255)
+  sekolah               Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id            String    @db.Uuid
+  nomor_induk_sekolah   String?   @db.VarChar(32)
+  nomor_induk_nasional  String?   @db.VarChar(32)
+  kelas                 Int?
+  tanggal_lahir         DateTime?
+  alamat                String?   @db.Text
+  no_ponsel             String?   @db.VarChar(24)
+  tingkat               String?   @db.VarChar(8)
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  tahun_ajaran          String?   @db.VarChar(16)
+  tahun_angkatan        String?   @db.VarChar(4)
+  jenis_kelamin         String    @db.VarChar(10)
+  is_active             Boolean   @default(true)
+  deleted               Boolean   @default(false)
+}
+
+model TenagaPendidikanGuru {
+  id              String    @id @db.Uuid @default(uuid())
+  nama            String    @default("") @db.VarChar(255)
+  no_ktp          String    @db.VarChar(255)
+  nuptk           String?   @db.VarChar(32)
+  alamat          String?   @db.Text
+  no_ponsel       String?   @db.VarChar(24)
+  ptk             String?   @db.VarChar(255) // mata pelajaran
+  jenis_kelamin   String    @db.VarChar(10)
+  tanggal_lahir   DateTime?
+  sekolah         Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id      String    @db.Uuid
+  latar_belakang  String    @db.Text @default("")
+  jabatan         String?   @db.VarChar(255)
+  status          String?   @db.VarChar(8) // pns / honorer / swasta
+  kategori        String    @db.VarChar(15) @default("guru") // guru / tenaga-pendidik
+  jenjang         String    @db.VarChar(32) @default("")
+  is_active       Boolean   @default(true)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt @default(now())
+  deleted         Boolean   @default(false)
+}
+
+model SaranaPrasarana {
+  id                String    @id @db.Uuid @default(uuid())
+  nama              String
+  jumlah            Int?
+  jenis             String // ruangan | gedung
+  kondisi           String?
+  sekolah           Sekolah   @relation(fields: [sekolah_id], references: [id])
+  sekolah_id        String    @db.Uuid
+  is_bangunan       Boolean   @default(false)
+  daftar_foto_url   String[]
+  daftar_inventori  Inventaris[]
+  created_at        DateTime  @default(now())
+  deleted           Boolean   @default(false)
+}
+
+model Inventaris {
+  id                   String            @id @db.Uuid @default(uuid())
+  nama                 String
+  kode_inventaris      String
+  kondisi              String?            @db.VarChar(32)
+  daftar_foto_url      String[]
+  sarana_prasarana     SaranaPrasarana   @relation(fields: [sarana_prasarana_id], references: [id])
+  sarana_prasarana_id  String            @db.Uuid
+  created_at           DateTime  @default(now())
+  deleted              Boolean   @default(false)
+}
+
+model User {
+  id              String      @id @db.Uuid
+  // email           String      @unique
+  username        String      @unique
+  name            String?
+  password        String
+  level           String      // root | operator
+  scope           String      // pendidikan | kemenag | cabang dinas
+}
+

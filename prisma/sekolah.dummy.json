@@ -1,0 +1,50 @@
+[
+	{
+		"id": "80df2070-8906-497c-bffb-e00ac79478cf",
+		"kecamatan": "Banyuates",
+		"kelurahan_atau_desa": "Banyuates",
+		"nama": "TK TAMAN KANAK",
+		"is_madrasah": false,
+		"tingkat": "TK",
+		"profil": "Deskripsi TK",
+		"jenis": "swasta",
+		"npsn": "50103149",
+		"koordinat": [
+			"-6.95374",
+			"113.176276"
+		],
+		"created_at": "2022-11-19T09:29:41.513Z",
+		"updated_at": "2022-11-19T09:35:31.306Z"
+	},
+	{
+		"id": "40300013-7dc8-448c-bb69-3f9495118980",
+		"kecamatan": "Sampang",
+		"kelurahan_atau_desa": "Banyumas",
+		"nama": "SMA MENENGAH",
+		"is_madrasah": false,
+		"tingkat": "SMA",
+		"profil": "Deskripsi SMA",
+		"jenis": "negeri",
+		"npsn": "50103150",
+		"koordinat": ["-7.1939017", "113.2467007"],
+		"created_at": "2022-11-19T09:29:41.601Z",
+		"updated_at": "2022-11-19T09:35:31.316Z"
+	},
+	{
+		"id": "018daeac-7803-492a-91ab-e16592c3a238",
+		"kecamatan": "Banyuates",
+		"kelurahan_atau_desa": "Banyuates",
+		"nama": "lembaga",
+		"is_madrasah": false,
+		"tingkat": "SMP",
+		"profil": "sekolah description",
+		"jenis": "swasta",
+		"npsn": "1234",
+		"koordinat": [
+			"-6.95374",
+			"113.176276"
+		],
+		"created_at": "2022-11-01T18:28:02.178Z",
+		"updated_at": "2022-11-19T13:00:47.433Z"
+	}
+]

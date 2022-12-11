@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  db:
+    image: "postgres:12"
+    ports:
+      - "54320:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=gtk-sampang-2022
+      - POSTGRES_DB=gtkdb
+    container_name: gtk
+    restart: always
