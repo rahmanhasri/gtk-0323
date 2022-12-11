@@ -159,3 +159,80 @@ input:focus {
   box-shadow: 0 0 0 1px hsl(166, 67%, 51%) !important;
 }
 </style>
+
+<style scoped>
+  .va {
+    display: flex;
+    align-items: center;
+  }
+  .shadowed {
+    box-shadow: 10px 10px 42px -3px rgba(0, 0, 0, 0.75);
+    -webkit-box-shadow: 10px 10px 42px -3px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 10px 10px 42px -3px rgba(0, 0, 0, 0.75);
+  }
+  /* :root {
+      --brandColor: hsl(166, 67%, 51%);
+      --background: rgb(247, 247, 247);
+      --textDark: hsla(0, 0%, 0%, 0.66);
+      --textLight: hsla(0, 0%, 0%, 0.33);
+    } */
+  body {
+    background: rgb(247, 247, 247);
+    height: 100vh;
+    color: hsla(0, 0%, 0%, 0.66);
+  }
+  .field:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+  .register {
+    margin-top: 12%;
+    background: white;
+    border-radius: 10px;
+  }
+  .left,
+  .right {
+    padding: 4.5rem;
+  }
+  .left {
+    border-right: 5px solid rgb(247, 247, 247);
+  }
+  .left .title {
+    font-weight: 800;
+    letter-spacing: -2px;
+  }
+  .left .colored {
+    color: hsl(166, 67%, 51%);
+    font-weight: 500;
+    margin-top: 1rem !important;
+    letter-spacing: -1px;
+  }
+  .left p {
+    color: hsla(0, 0%, 0%, 0.33);
+    font-size: 1.15rem;
+  }
+  .right .title {
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+  .right .description {
+    margin-top: 1rem;
+    margin-bottom: 1rem !important;
+    color: hsla(0, 0%, 0%, 0.33);
+    font-size: 1.15rem;
+  }
+  .right small {
+    color: hsla(0, 0%, 0%, 0.33);
+  }
+  input {
+    font-size: 1rem;
+  }
+  input:focus {
+    border-color: hsl(166, 67%, 51%) !important;
+    box-shadow: 0 0 0 1px hsl(166, 67%, 51%) !important;
+  }
+  .fab,
+  .fas {
+    color: hsla(0, 0%, 0%, 0.33);
+    margin-right: 1rem;
+  }
+</style>

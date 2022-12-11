@@ -101,3 +101,22 @@ export default {
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {}
 }
+
+  toast: {
+    theme: 'outline',
+	  position: 'top-center',
+	  duration : 5000,
+  },
+  fontawesome: {
+    icons: {
+      solid: [
+        'faCircleDown',
+        'faUpload',
+        'faCircleExclamation',
+        'faMagnifyingGlass',
+      ],
+    }
+  },
+  // Build Configuration: https://go.nuxtjs.dev/config-build
+  build: {}
+}
